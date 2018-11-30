@@ -1,6 +1,6 @@
 # Lost Cities, Regained
 
-### _Created By_ **Joe Friesen**
+### _Created By_ **Joseph Friesen**
 
 ## Description
 
@@ -11,7 +11,7 @@ Application built for Epicodus final capstone project.
 ## Screenshots
 
 State of the app thus far (a few tweaks here or there still to be added):
-![TBD]('.src/assets/tbd.png')
+![TBD](./src/assets/work-in-progress.png)
 
 ## Development Planning
 
@@ -52,7 +52,9 @@ An online, realtime implementation of Lost Cities, a simple two-player card game
 
 ### Component Structure
 
-![Component graph](./src/assets/componentgraph.jpg)
+![Component graph: Top](./src/assets/component-graph-top.jpg)
+![Component graph: Player/Lobby](./src/assets/component-graph-profile-lobby.jpg)
+![Component graph: Game](./src/assets/component-graph-game.jpg)
 
 ### Notes
 
