@@ -1,0 +1,10 @@
+{
+	"version": 3,
+	"file": "profile.css",
+	"sources": [
+		"../scss/profile.scss",
+		"../scss/mixins.scss"
+	],
+	"names": [],
+	"mappings": "AAEA,AAAA,kBAAkB,CAAC;ECDjB,OAAO,EAAE,YAAY;EACrB,OAAO,EAAE,IAAI;EACb,cAAc,EDAA,GAAG;ECCjB,eAAe,EAAE,aAAa;EAC9B,WAAW,EAAE,MAAM;EDDnB,MAAM,EAAE,MAAM;EACd,KAAK,EAAE,GAAG,GACX"
+}
