@@ -18,7 +18,7 @@
   border: 1px dotted black;
   @include flex(row);
   width: 100%;
-  height: 10%;
+  height: 15%;
 }
 
 .opponenthand--container {
@@ -35,7 +35,7 @@
 
 .commonarea--container {
   border: 1px solid green;
-  width: calc(100% - 80px);
+  width: 100%;
   height: 30%;
   border-radius: 25px;
   background: lighten($primary1, 10%);
@@ -44,7 +44,7 @@
 
 .tableau--container {
   border: 1px solid green;
-  width: calc(100% - 80px);
+  width: 100%;
   height: 30%;
   border-radius: 25px;
   background: lighten($primary1, 10%);
@@ -71,14 +71,49 @@
 }
 
 // COMMON AREA COMPONENT
-
 .commonarea {
   width: 100%;
   height: 100%;
   @include flex(row);
 }
 
-// DISCARD COMPONENT
+.cardtableau--container {
+  @include flex(column)
+}
+
+// TABLEAU COMPONENT
+.player-tableau {
+  width: 100%;
+  height: 100%;
+  @include flex(row);
+}
+
+// CARD DISPLAYS
+.display--card {
+  height: 200px;
+  width: 100px;
+  border-radius: 20px;
+  padding: 5px;
+}
+
 .discard--red {
-  
+  border: 3px solid $red1;
+  background: $red3;
+}
+
+.discard--green {
+  border: 3px solid $green1;
+  background: $green3;
+}
+.discard--white {
+  border: 3px solid $white1;
+  background: $white3;
+}
+.discard--blue {
+  border: 3px solid $blue1;
+  background: $blue3;
+}
+.discard--yellow {
+  border: 3px solid $yellow1;
+  background: $yellow3;
 }

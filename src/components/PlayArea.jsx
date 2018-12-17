@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import '../styles/css/game.css';
 
-export default class Discard extends React.Component {
+export default class PlayArea extends React.Component {
   constructor(props) {
     super(props)
     this.state = {}
@@ -15,13 +15,13 @@ export default class Discard extends React.Component {
   render() {
     return (
       <div className={"display--card discard--" + this.props.color}>
-        Discard {this.props.color}
+        Play Area {this.props.color}
 
       </div>
     )
   }
 }
 
-Discard.propTypes = {
+PlayArea.propTypes = {
   color: PropTypes.string
 }
