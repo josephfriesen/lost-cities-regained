@@ -4,6 +4,7 @@ import Header from './Header';
 import Footer from './Footer';
 import Profile from './Profile';
 import Lobby from './Lobby';
+import Game from './Game';
 
 export default class Main extends React.Component {
   constructor(props) {
@@ -21,6 +22,7 @@ export default class Main extends React.Component {
             <Route path="/main/profile" render={() => { return <Profile /> }} />
             <Route path="/main/lobby" render={() => { return <Lobby /> }} />
             <Route path="/main/rules" render={() => { return <div>Route: /main/rules</div> }} />
+            <Route path="/main/game" render={() => { return <Game />}} />
           </Switch>
         </div>
         <Footer />

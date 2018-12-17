@@ -1,0 +1,67 @@
+.game {
+  border: 1px solid black;
+  display: -webkit-flex;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 auto;
+  width: 80%;
+  padding: 10px;
+  height: 100%; }
+
+.opponent--row {
+  border: 1px dotted black;
+  display: -webkit-flex;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 10%; }
+
+.opponenthand--container {
+  border: 1px dotted yellow;
+  height: 100%;
+  width: 80%; }
+
+.opponentinfo--container {
+  border: 1px dotted purple;
+  height: 100%;
+  width: 20%; }
+
+.commonarea--container {
+  border: 1px solid green;
+  width: calc(100% - 80px);
+  height: 30%;
+  border-radius: 25px;
+  background: #FAC881;
+  padding: 15px 10px; }
+
+.tableau--container {
+  border: 1px solid green;
+  width: calc(100% - 80px);
+  height: 30%;
+  border-radius: 25px;
+  background: #fef3e3;
+  padding: 15px 10px; }
+
+.user--row {
+  border: 1px dotted black;
+  display: -webkit-flex;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 15%; }
+
+.userhand--container {
+  border: 1px dotted yellow;
+  height: 100%;
+  width: 80%; }
+
+.userinfo--container {
+  border: 1px dotted purple;
+  height: 100%;
+  width: 20%; }

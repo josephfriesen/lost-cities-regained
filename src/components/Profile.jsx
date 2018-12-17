@@ -6,7 +6,7 @@ import '../styles/css/profile.css';
 
 export default function Profile(props) {
   return (
-    <div className="profile-container main-window">
+    <div className="profile--container main-window">
       <div>
         <UserInfo />
       </div>

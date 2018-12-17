@@ -1,4 +1,4 @@
-.profile-container {
+.profile--container {
   display: -webkit-flex;
   display: flex;
   flex-direction: row;
@@ -7,3 +7,5 @@
   margin: 0 auto;
   width: 80%;
   padding: 10px; }
+
+/*# sourceMappingURL=profile.css.map */

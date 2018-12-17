@@ -1,6 +1,6 @@
 @import "./mixins.scss";
 
-.profile-container {
+.profile--container {
   @include flex(row);
   margin: 0 auto;
   width: 80%;

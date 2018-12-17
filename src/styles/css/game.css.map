@@ -1,0 +1,10 @@
+{
+	"version": 3,
+	"file": "game.css",
+	"sources": [
+		"../scss/game.scss",
+		"../scss/mixins.scss"
+	],
+	"names": [],
+	"mappings": "AAEA,AAAA,KAAK,CAAC;ECDJ,OAAO,EAAE,YAAY;EACrB,OAAO,EAAE,IAAI;EACb,cAAc,EDAA,GAAG;ECCjB,eAAe,EAAE,aAAa;EAC9B,WAAW,EAAE,MAAM;EDDnB,MAAM,EAAE,MAAM;EACd,KAAK,EAAE,GAAG;EACV,OAAO,EAAE,IAAI,GACd;;AAED,AAAA,oBAAoB,CAAC;EACnB,MAAM,EAAE,gBAAgB;EACxB,KAAK,EAAE,IAAI,GACZ"
+}
