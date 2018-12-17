@@ -12,12 +12,28 @@ export default class CommonArea extends React.Component {
   render() {
     return (
       <div className="commonarea">
-        Common Area
         <div className="drawdeck--container">
           <Drawdeck />
         </div>
         <div className="discard--container">
-          <Discard />
+          <Discard
+            color="red"/>
+        </div>
+        <div className="discard--container">
+          <Discard
+            color="green"/>
+        </div>
+        <div className="discard--container">
+          <Discard
+            color="white"/>
+        </div>
+        <div className="discard--container">
+          <Discard
+            color="blue"/>
+        </div>
+        <div className="discard--container">
+          <Discard
+            color="yellow"/>
         </div>
       </div>
     )

@@ -1,11 +1,15 @@
 @import "./mixins.scss";
 @import "./variables.scss";
 
+// GAME COMPONENT
+
 .game {
   border: 1px solid black;
   @include flex(column);
   margin: 0 auto;
   width: 80%;
+  min-width: 768px;
+  max-width: 1024px;
   padding: 10px;
   height: 100%;
 }
@@ -34,7 +38,7 @@
   width: calc(100% - 80px);
   height: 30%;
   border-radius: 25px;
-  background: $primary1;
+  background: lighten($primary1, 10%);
   padding: 15px 10px;
 }
 
@@ -43,7 +47,7 @@
   width: calc(100% - 80px);
   height: 30%;
   border-radius: 25px;
-  background: lighten($primary1, 20%);
+  background: lighten($primary1, 10%);
   padding: 15px 10px;
 }
 
@@ -64,4 +68,17 @@
   border: 1px dotted purple;
   height: 100%;
   width: 20%;
+}
+
+// COMMON AREA COMPONENT
+
+.commonarea {
+  width: 100%;
+  height: 100%;
+  @include flex(row);
+}
+
+// DISCARD COMPONENT
+.discard--red {
+  
 }

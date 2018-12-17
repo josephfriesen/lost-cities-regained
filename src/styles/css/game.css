@@ -7,6 +7,8 @@
   align-items: center;
   margin: 0 auto;
   width: 80%;
+  min-width: 768px;
+  max-width: 1024px;
   padding: 10px;
   height: 100%; }
 
@@ -35,7 +37,7 @@
   width: calc(100% - 80px);
   height: 30%;
   border-radius: 25px;
-  background: #FAC881;
+  background: #fcddb2;
   padding: 15px 10px; }
 
 .tableau--container {
@@ -43,7 +45,7 @@
   width: calc(100% - 80px);
   height: 30%;
   border-radius: 25px;
-  background: #fef3e3;
+  background: #fcddb2;
   padding: 15px 10px; }
 
 .user--row {
@@ -65,3 +67,12 @@
   border: 1px dotted purple;
   height: 100%;
   width: 20%; }
+
+.commonarea {
+  width: 100%;
+  height: 100%;
+  display: -webkit-flex;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center; }

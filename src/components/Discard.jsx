@@ -7,9 +7,15 @@ export default class Discard extends React.Component {
     this.state = {}
   }
 
+  componentDidMount() {
+    console.log(this.props.color);
+  }
+
   render() {
     return (
-      <div>Discard Piles</div>
+      <div className={"discard--pile discard--" + this.props.color}>
+        Discard {this.props.color}
+      </div>
     )
   }
 }
