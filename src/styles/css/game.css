@@ -38,7 +38,7 @@
   height: 30%;
   border-radius: 25px;
   background: #fcddb2;
-  padding: 15px 10px; }
+  padding: 5px 10px; }
 
 .tableau--container {
   border: 1px solid green;
@@ -46,7 +46,7 @@
   height: 30%;
   border-radius: 25px;
   background: #fcddb2;
-  padding: 15px 10px; }
+  padding: 5px 10px; }
 
 .user--row {
   border: 1px dotted black;
@@ -68,6 +68,16 @@
   height: 100%;
   width: 20%; }
 
+.cardtableau--container {
+  display: -webkit-flex;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between; }
+
 .commonarea {
   width: 100%;
   height: 100%;
@@ -77,12 +87,9 @@
   justify-content: space-between;
   align-items: center; }
 
-.cardtableau--container {
-  display: -webkit-flex;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center; }
+.cardtableau--header h3 {
+  margin: 0;
+  padding: 0; }
 
 .player-tableau {
   width: 100%;
@@ -94,7 +101,7 @@
   align-items: center; }
 
 .display--card {
-  height: 200px;
+  height: 150px;
   width: 100px;
   border-radius: 20px;
   padding: 5px; }

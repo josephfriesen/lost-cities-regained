@@ -6,7 +6,7 @@ import Profile from './Profile';
 import Lobby from './Lobby';
 import Game from './Game';
 
-export default class Main extends React.Component {
+class Main extends React.Component {
   constructor(props) {
     super(props);
     this.state = {};
@@ -30,3 +30,5 @@ export default class Main extends React.Component {
     );
   }
 }
+
+export default withRouter(Main);

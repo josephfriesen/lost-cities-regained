@@ -1,5 +1,5 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import UserInfo from './UserInfo';
 import GameHistory from './GameHistory';
 import '../styles/css/profile.css';
@@ -17,4 +17,4 @@ export default function Profile(props) {
   );
 }
 
-Profile.propTypes = {}
+// Profile.propTypes = {}

@@ -1,5 +1,5 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 
 export default function Lobby(props) {
   return (
@@ -7,4 +7,4 @@ export default function Lobby(props) {
   );
 }
 
-Lobby.PropTypes = {}
+// Lobby.PropTypes = {}
