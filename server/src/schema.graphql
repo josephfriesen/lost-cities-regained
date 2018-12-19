@@ -2,7 +2,7 @@
 
 type Query {
   getAllCards: [Card!]!
-  shuffleDeck: [Card!]!
+  constructRandomizedDeckInstances: [CardInstance!]!
 }
 
 type Mutation {

@@ -1,5 +1,5 @@
-const { getAllCards, shuffleDeck } = require('./Query');
-const { sortCardsByColorAndValue, dealFullHand, getCardIds } = require('./GameFunctions');
+const { getAllCards, constructRandomizedDeckInstances } = require('./Query');
+const { sortCardsByColorAndValue, dealCards, getCardIdsFromConstructedInstances } = require('./GameFunctions');
 const { players } = require('../models/players');
 
 function newPlayer(parent, args, context, info) {
@@ -9,25 +9,20 @@ function newPlayer(parent, args, context, info) {
 }
 
 async function newRound(parent, args, context, info) {
-  const deck = await shuffleDeck(parent, args, context, info);
-  const player1handIds = getCardIds(sortCardsByColorAndValue(dealFullHand(deck)));
-  const player1Tableau = [];
-  const player1Score = 0;
-  const player2handIds = getCardIds(sortCardsByColorAndValue(dealFullHand(deck)));
-  const player2Tableau = [];
-  const player2Score = 0;
-  const drawDeckIds = getCardIds(deck);
+  const deck = await constructRandomizedDeckInstances(parent, args, context, info);
+  const player1Hand = getCardIdsFromConstructedInstances(dealCards(deck, 8));
+  const player2Hand = getCardIdsFromConstructedInstances(dealCards(deck, 8));
+  console.log("Player1 Hand: ", player1Hand);
   const discardPile = [];
   const roundCreateInput = {
     data: {
-      drawDeck: { connect: drawDeckIds },
-      player1Hand: { connect: player1handIds },
-      player1Tableau: { connect: player1Tableau },
-      player2Hand: { connect: player2handIds },
-      player2Tableau: { connect: player2Tableau },
-      discardPile: { connect: discardPile },
-      player1Score,
-      player2Score
+      drawDeck: { create: deck },
+      player1Hand: { connect: player1Hand },
+      player2Hand: { connect: player2Hand },
+      player1Tableau: [],
+      player2Tableau: [],
+      player1Score: 0,
+      player2Score: 0
     }
   }
   return context.db.mutation.createRound(roundCreateInput, info);
