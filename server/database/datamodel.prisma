@@ -17,8 +17,8 @@ type Game {
   player2: Player! @relation(name: "GamesJoinedByPlayer")
   roundsNum: Int! @default(value: 3)
   rounds: [Round!]!
-  player1Score: Int!
-  player2Score: Int!
+  player1Score: Int! @default(value: 0)
+  player2Score: Int! @default(value: 0)
   currentRound: Int!
   gameInProgress: Boolean! @default(value: "true")
   Winner: Player @relation(name: "GamesWon")

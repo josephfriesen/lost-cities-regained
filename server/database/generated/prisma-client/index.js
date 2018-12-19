@@ -32,6 +32,7 @@ var models = [
 exports.Prisma = prisma_lib_1.makePrismaClientClass({
   typeDefs,
   models,
-  endpoint: `https://us1.prisma.sh/lost-cities-regained/lost-cities/dev`
+  endpoint: `https://us1.prisma.sh/lost-cities-regained/lost-cities/dev`,
+  secret: `shhhitsasecret8888`
 });
 exports.prisma = new exports.Prisma();

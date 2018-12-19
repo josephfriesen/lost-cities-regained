@@ -1,6 +1,7 @@
 const { getAllCards } = require('./Query');
 const { shuffledCards } = require('../models/cardDecks.js');
 
+// sortCardsByColorAndValue will take an array of card objects as argument and return an array of those same cards sorted first by color, then by expeditionValue (investment cards first)
 function sortCardsByColorAndValue(arr) {
   const colorSort = ["RED", "GREEN", "WHITE", "BLUE", "YELLOW"];
   arr.sort(function(a,b) {
@@ -16,8 +17,25 @@ function sortCardsByColorAndValue(arr) {
   return arr;
 }
 
-console.log(sortCardsByColorAndValue(shuffledCards));
+// dealFullHand will take an array of (shuffled) cards and will return an eight card array of the first eight cards in the deck. **This will mutate the original deck**.
+function dealFullHand(deck) {
+  return deck.splice(0,8);
+}
+
+// getCardIds will take any array of card objects and return an array consisting only of the card ids.
+function getCardIds(arr) {
+  const len = arr.length;
+  let out = [];
+  for (let i = 0; i < len; i++) {
+    const obj = { id: arr[i].id };
+    out.push(obj);
+  }
+  return out;
+}
 
 module.exports = {
   sortCardsByColorAndValue,
+  dealFullHand,
+  getCardIds,
+
 }

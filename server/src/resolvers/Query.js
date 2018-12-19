@@ -19,5 +19,5 @@ async function shuffleDeck(parent, args, context, info) {
 
 module.exports = {
   getAllCards,
-  shuffleDeck
+  shuffleDeck,
 }

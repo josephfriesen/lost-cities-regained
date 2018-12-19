@@ -286,8 +286,8 @@ export interface GameCreateWithoutPlayer1Input {
   player2: PlayerCreateOneWithoutGamesJoinedInput;
   roundsNum?: Int;
   rounds?: RoundCreateManyInput;
-  player1Score: Int;
-  player2Score: Int;
+  player1Score?: Int;
+  player2Score?: Int;
   currentRound: Int;
   gameInProgress?: Boolean;
   Winner?: PlayerCreateOneWithoutGamesWonInput;
@@ -302,8 +302,8 @@ export interface GameCreateInput {
   player2: PlayerCreateOneWithoutGamesJoinedInput;
   roundsNum?: Int;
   rounds?: RoundCreateManyInput;
-  player1Score: Int;
-  player2Score: Int;
+  player1Score?: Int;
+  player2Score?: Int;
   currentRound: Int;
   gameInProgress?: Boolean;
   Winner?: PlayerCreateOneWithoutGamesWonInput;
@@ -326,8 +326,8 @@ export interface GameCreateWithoutWinnerInput {
   player2: PlayerCreateOneWithoutGamesJoinedInput;
   roundsNum?: Int;
   rounds?: RoundCreateManyInput;
-  player1Score: Int;
-  player2Score: Int;
+  player1Score?: Int;
+  player2Score?: Int;
   currentRound: Int;
   gameInProgress?: Boolean;
 }
@@ -370,8 +370,8 @@ export interface GameCreateWithoutPlayer2Input {
   player1: PlayerCreateOneWithoutGamesStartedInput;
   roundsNum?: Int;
   rounds?: RoundCreateManyInput;
-  player1Score: Int;
-  player2Score: Int;
+  player1Score?: Int;
+  player2Score?: Int;
   currentRound: Int;
   gameInProgress?: Boolean;
   Winner?: PlayerCreateOneWithoutGamesWonInput;
