@@ -1,1 +1,9 @@
-# import Player, Game, Round, Card, Query from "./generated/prisma.graphql"
+# import Player, Game, Round, Card from "./generated/prisma.graphql"
+
+type Query {
+  cards: [Card]
+}
+
+type Mutation {
+  newPlayer(name: String, email: String): Player
+}
