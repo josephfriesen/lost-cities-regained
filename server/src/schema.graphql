@@ -1,7 +1,8 @@
 # import Player, Game, Round, Card from "./generated/prisma.graphql"
 
 type Query {
-  cards: [Card]
+  getAllCards: [Card!]!
+  shuffleDeck: [Card!]!
 }
 
 type Mutation {
