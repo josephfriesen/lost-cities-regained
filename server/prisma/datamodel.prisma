@@ -1,0 +1,59 @@
+type Player {
+  id: ID! @unique
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+  email: String
+  gamesStarted: [Game!] @relation(name: "GamesStartedByPlayer")
+  gamesJoined: [Game!] @relation(name: "GamesJoinedByPlayer")
+  gamesWon: [Game!] @relation(name: "GamesWon")
+}
+
+type Game {
+  id: ID! @unique
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  player1: Player! @relation(name: "GamesStartedByPlayer")
+  player2: Player! @relation(name: "GamesJoinedByPlayer")
+  roundsNum: Int! @default(value: 3)
+  rounds: [Round!]!
+  player1Score: Int!
+  player2Score: Int!
+  currentRound: Int!
+  gameInProgress: Boolean! @default(value: "true")
+  Winner: Player @relation(name: "GamesWon")
+}
+
+type Round {
+  createdAt: DateTime!
+  drawDeck: [Card!]! @relation(name: "CardsInDrawDeck")
+  player1Hand: [Card!]! @relation(name: "CardsInPlayer1Hand")
+  player1Tableau: [Card!]! @relation(name: "CardsInPlayer1Tableau")
+  player1Score: Int!
+  player2Hand: [Card!]! @relation(name: "CardsInPlayer2Hand")
+  player2Tableau: [Card!]! @relation(name: "CardsInPlayer2Tableau")
+  player2Score: Int!
+  discardPile: [Card!]! @relation(name: "CardsInDiscardPile")
+}
+
+type Card {
+  id: ID! @unique
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  cardType: CardTypes!
+  expeditionValue: Int
+  color: Colors!
+}
+
+enum CardTypes {
+  INVESTMENT
+  EXPEDITION
+}
+
+enum Colors {
+  RED
+  GREEN
+  WHITE
+  BLUE
+  YELLOW
+}
