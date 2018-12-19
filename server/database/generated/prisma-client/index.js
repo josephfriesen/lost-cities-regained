@@ -9,6 +9,10 @@ var models = [
     embedded: false
   },
   {
+    name: "CardInstance",
+    embedded: false
+  },
+  {
     name: "CardTypes",
     embedded: false
   },

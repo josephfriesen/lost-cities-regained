@@ -26,14 +26,14 @@ type Game {
 
 type Round {
   createdAt: DateTime!
-  drawDeck: [Card!]! @relation(name: "CardsInDrawDeck")
+  drawDeck: [CardInstance!]! @relation(name: "CardsInDrawDeck")
   player1Hand: [Card!]! @relation(name: "CardsInPlayer1Hand")
   player1Tableau: [Card!]! @relation(name: "CardsInPlayer1Tableau")
   player1Score: Int!
   player2Hand: [Card!]! @relation(name: "CardsInPlayer2Hand")
   player2Tableau: [Card!]! @relation(name: "CardsInPlayer2Tableau")
   player2Score: Int!
-  discardPile: [Card!]! @relation(name: "CardsInDiscardPile")
+  discardPile: [CardInstance!]! @relation(name: "CardsInDiscardPile")
 }
 
 type Card {
@@ -43,6 +43,11 @@ type Card {
   cardType: CardTypes!
   expeditionValue: Int
   color: Colors!
+}
+
+type CardInstance {
+  card: Card!
+  orderIndex: Int
 }
 
 enum CardTypes {

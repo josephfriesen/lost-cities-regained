@@ -3,6 +3,10 @@ module.exports = {
   count: Int!
 }
 
+type AggregateCardInstance {
+  count: Int!
+}
+
 type AggregateGame {
   count: Int!
 }
@@ -45,9 +49,91 @@ input CardCreateManyInput {
   connect: [CardWhereUniqueInput!]
 }
 
+input CardCreateOneInput {
+  create: CardCreateInput
+  connect: CardWhereUniqueInput
+}
+
 type CardEdge {
   node: Card!
   cursor: String!
+}
+
+type CardInstance {
+  card: Card!
+  orderIndex: Int
+}
+
+type CardInstanceConnection {
+  pageInfo: PageInfo!
+  edges: [CardInstanceEdge]!
+  aggregate: AggregateCardInstance!
+}
+
+input CardInstanceCreateInput {
+  card: CardCreateOneInput!
+  orderIndex: Int
+}
+
+input CardInstanceCreateManyInput {
+  create: [CardInstanceCreateInput!]
+}
+
+type CardInstanceEdge {
+  node: CardInstance!
+  cursor: String!
+}
+
+enum CardInstanceOrderByInput {
+  orderIndex_ASC
+  orderIndex_DESC
+  id_ASC
+  id_DESC
+  createdAt_ASC
+  createdAt_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+}
+
+type CardInstancePreviousValues {
+  orderIndex: Int
+}
+
+type CardInstanceSubscriptionPayload {
+  mutation: MutationType!
+  node: CardInstance
+  updatedFields: [String!]
+  previousValues: CardInstancePreviousValues
+}
+
+input CardInstanceSubscriptionWhereInput {
+  mutation_in: [MutationType!]
+  updatedFields_contains: String
+  updatedFields_contains_every: [String!]
+  updatedFields_contains_some: [String!]
+  node: CardInstanceWhereInput
+  AND: [CardInstanceSubscriptionWhereInput!]
+  OR: [CardInstanceSubscriptionWhereInput!]
+  NOT: [CardInstanceSubscriptionWhereInput!]
+}
+
+input CardInstanceUpdateManyMutationInput {
+  orderIndex: Int
+}
+
+input CardInstanceWhereInput {
+  card: CardWhereInput
+  orderIndex: Int
+  orderIndex_not: Int
+  orderIndex_in: [Int!]
+  orderIndex_not_in: [Int!]
+  orderIndex_lt: Int
+  orderIndex_lte: Int
+  orderIndex_gt: Int
+  orderIndex_gte: Int
+  AND: [CardInstanceWhereInput!]
+  OR: [CardInstanceWhereInput!]
+  NOT: [CardInstanceWhereInput!]
 }
 
 enum CardOrderByInput {
@@ -600,6 +686,9 @@ type Mutation {
   upsertCard(where: CardWhereUniqueInput!, create: CardCreateInput!, update: CardUpdateInput!): Card!
   deleteCard(where: CardWhereUniqueInput!): Card
   deleteManyCards(where: CardWhereInput): BatchPayload!
+  createCardInstance(data: CardInstanceCreateInput!): CardInstance!
+  updateManyCardInstances(data: CardInstanceUpdateManyMutationInput!, where: CardInstanceWhereInput): BatchPayload!
+  deleteManyCardInstances(where: CardInstanceWhereInput): BatchPayload!
   createGame(data: GameCreateInput!): Game!
   updateGame(data: GameUpdateInput!, where: GameWhereUniqueInput!): Game
   updateManyGames(data: GameUpdateManyMutationInput!, where: GameWhereInput): BatchPayload!
@@ -892,6 +981,8 @@ type Query {
   card(where: CardWhereUniqueInput!): Card
   cards(where: CardWhereInput, orderBy: CardOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Card]!
   cardsConnection(where: CardWhereInput, orderBy: CardOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): CardConnection!
+  cardInstances(where: CardInstanceWhereInput, orderBy: CardInstanceOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [CardInstance]!
+  cardInstancesConnection(where: CardInstanceWhereInput, orderBy: CardInstanceOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): CardInstanceConnection!
   game(where: GameWhereUniqueInput!): Game
   games(where: GameWhereInput, orderBy: GameOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Game]!
   gamesConnection(where: GameWhereInput, orderBy: GameOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): GameConnection!
@@ -905,14 +996,14 @@ type Query {
 
 type Round {
   createdAt: DateTime!
-  drawDeck(where: CardWhereInput, orderBy: CardOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Card!]
+  drawDeck(where: CardInstanceWhereInput, orderBy: CardInstanceOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [CardInstance!]
   player1Hand(where: CardWhereInput, orderBy: CardOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Card!]
   player1Tableau(where: CardWhereInput, orderBy: CardOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Card!]
   player1Score: Int!
   player2Hand(where: CardWhereInput, orderBy: CardOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Card!]
   player2Tableau(where: CardWhereInput, orderBy: CardOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Card!]
   player2Score: Int!
-  discardPile(where: CardWhereInput, orderBy: CardOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Card!]
+  discardPile(where: CardInstanceWhereInput, orderBy: CardInstanceOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [CardInstance!]
 }
 
 type RoundConnection {
@@ -922,14 +1013,14 @@ type RoundConnection {
 }
 
 input RoundCreateInput {
-  drawDeck: CardCreateManyInput
+  drawDeck: CardInstanceCreateManyInput
   player1Hand: CardCreateManyInput
   player1Tableau: CardCreateManyInput
   player1Score: Int!
   player2Hand: CardCreateManyInput
   player2Tableau: CardCreateManyInput
   player2Score: Int!
-  discardPile: CardCreateManyInput
+  discardPile: CardInstanceCreateManyInput
 }
 
 input RoundCreateManyInput {
@@ -1038,9 +1129,9 @@ input RoundWhereInput {
   createdAt_lte: DateTime
   createdAt_gt: DateTime
   createdAt_gte: DateTime
-  drawDeck_every: CardWhereInput
-  drawDeck_some: CardWhereInput
-  drawDeck_none: CardWhereInput
+  drawDeck_every: CardInstanceWhereInput
+  drawDeck_some: CardInstanceWhereInput
+  drawDeck_none: CardInstanceWhereInput
   player1Hand_every: CardWhereInput
   player1Hand_some: CardWhereInput
   player1Hand_none: CardWhereInput
@@ -1069,9 +1160,9 @@ input RoundWhereInput {
   player2Score_lte: Int
   player2Score_gt: Int
   player2Score_gte: Int
-  discardPile_every: CardWhereInput
-  discardPile_some: CardWhereInput
-  discardPile_none: CardWhereInput
+  discardPile_every: CardInstanceWhereInput
+  discardPile_some: CardInstanceWhereInput
+  discardPile_none: CardInstanceWhereInput
   AND: [RoundWhereInput!]
   OR: [RoundWhereInput!]
   NOT: [RoundWhereInput!]
@@ -1079,6 +1170,7 @@ input RoundWhereInput {
 
 type Subscription {
   card(where: CardSubscriptionWhereInput): CardSubscriptionPayload
+  cardInstance(where: CardInstanceSubscriptionWhereInput): CardInstanceSubscriptionPayload
   game(where: GameSubscriptionWhereInput): GameSubscriptionPayload
   player(where: PlayerSubscriptionWhereInput): PlayerSubscriptionPayload
   round(where: RoundSubscriptionWhereInput): RoundSubscriptionPayload

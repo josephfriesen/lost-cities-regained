@@ -17,7 +17,18 @@ async function shuffleDeck(parent, args, context, info) {
   return output;
 }
 
+async function getNewCards(parent, args, context, info) {
+  // ARGS:
+  // filterList: list of IDs to filter the deck, these are cards that have been dealt already
+  // num: number of unique cards to get
+  let deck = await context.db.query.cards();
+  deck.filter(card => {
+    filterList.
+  })
+}
+
 module.exports = {
   getAllCards,
   shuffleDeck,
+  getNewCards,
 }

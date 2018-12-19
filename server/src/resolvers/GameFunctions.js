@@ -1,6 +1,23 @@
 const { getAllCards } = require('./Query');
 const { shuffledCards } = require('../models/cardDecks.js');
 
+// function getPermutation() {
+//   let arr = [];
+//   for (let n = 0; n < 60; n++) {
+//     arr.push(n);
+//   }
+//   let out = [];
+//   let limit;
+//   let rand;
+//   for (let i = 0; i < 60; i++) {
+//     limit = 60 - i;
+//     rand = Math.floor(Math.random() * limit);
+//     out.push(arr[rand]);
+//     arr.splice(rand,1);
+//   }
+//   return out;
+// }
+
 // sortCardsByColorAndValue will take an array of card objects as argument and return an array of those same cards sorted first by color, then by expeditionValue (investment cards first)
 function sortCardsByColorAndValue(arr) {
   const colorSort = ["RED", "GREEN", "WHITE", "BLUE", "YELLOW"];
@@ -34,6 +51,7 @@ function getCardIds(arr) {
 }
 
 module.exports = {
+  getPermutation,
   sortCardsByColorAndValue,
   dealFullHand,
   getCardIds,

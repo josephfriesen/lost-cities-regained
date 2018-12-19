@@ -15,6 +15,7 @@ export type AtLeastOne<T, U = { [K in keyof T]: Pick<T, K> }> = Partial<T> &
 
 export interface Exists {
   card: (where?: CardWhereInput) => Promise<boolean>;
+  cardInstance: (where?: CardInstanceWhereInput) => Promise<boolean>;
   game: (where?: GameWhereInput) => Promise<boolean>;
   player: (where?: PlayerWhereInput) => Promise<boolean>;
   round: (where?: RoundWhereInput) => Promise<boolean>;
@@ -62,6 +63,28 @@ export interface Prisma {
       last?: Int;
     }
   ) => CardConnectionPromise;
+  cardInstances: (
+    args?: {
+      where?: CardInstanceWhereInput;
+      orderBy?: CardInstanceOrderByInput;
+      skip?: Int;
+      after?: String;
+      before?: String;
+      first?: Int;
+      last?: Int;
+    }
+  ) => FragmentableArray<CardInstance>;
+  cardInstancesConnection: (
+    args?: {
+      where?: CardInstanceWhereInput;
+      orderBy?: CardInstanceOrderByInput;
+      skip?: Int;
+      after?: String;
+      before?: String;
+      first?: Int;
+      last?: Int;
+    }
+  ) => CardInstanceConnectionPromise;
   game: (where: GameWhereUniqueInput) => GamePromise;
   games: (
     args?: {
@@ -152,6 +175,16 @@ export interface Prisma {
   ) => CardPromise;
   deleteCard: (where: CardWhereUniqueInput) => CardPromise;
   deleteManyCards: (where?: CardWhereInput) => BatchPayloadPromise;
+  createCardInstance: (data: CardInstanceCreateInput) => CardInstancePromise;
+  updateManyCardInstances: (
+    args: {
+      data: CardInstanceUpdateManyMutationInput;
+      where?: CardInstanceWhereInput;
+    }
+  ) => BatchPayloadPromise;
+  deleteManyCardInstances: (
+    where?: CardInstanceWhereInput
+  ) => BatchPayloadPromise;
   createGame: (data: GameCreateInput) => GamePromise;
   updateGame: (
     args: { data: GameUpdateInput; where: GameWhereUniqueInput }
@@ -201,6 +234,9 @@ export interface Subscription {
   card: (
     where?: CardSubscriptionWhereInput
   ) => CardSubscriptionPayloadSubscription;
+  cardInstance: (
+    where?: CardInstanceSubscriptionWhereInput
+  ) => CardInstanceSubscriptionPayloadSubscription;
   game: (
     where?: GameSubscriptionWhereInput
   ) => GameSubscriptionPayloadSubscription;
@@ -219,6 +255,16 @@ export interface ClientConstructor<T> {
 /**
  * Types
  */
+
+export type CardInstanceOrderByInput =
+  | "orderIndex_ASC"
+  | "orderIndex_DESC"
+  | "id_ASC"
+  | "id_DESC"
+  | "createdAt_ASC"
+  | "createdAt_DESC"
+  | "updatedAt_ASC"
+  | "updatedAt_DESC";
 
 export type CardOrderByInput =
   | "id_ASC"
@@ -282,31 +328,37 @@ export type PlayerOrderByInput =
 
 export type MutationType = "CREATED" | "UPDATED" | "DELETED";
 
-export interface GameCreateWithoutPlayer1Input {
-  player2: PlayerCreateOneWithoutGamesJoinedInput;
-  roundsNum?: Int;
-  rounds?: RoundCreateManyInput;
-  player1Score?: Int;
-  player2Score?: Int;
-  currentRound: Int;
-  gameInProgress?: Boolean;
-  Winner?: PlayerCreateOneWithoutGamesWonInput;
+export interface CardCreateManyInput {
+  create?: CardCreateInput[] | CardCreateInput;
+  connect?: CardWhereUniqueInput[] | CardWhereUniqueInput;
 }
 
 export type CardWhereUniqueInput = AtLeastOne<{
   id: ID_Input;
 }>;
 
-export interface GameCreateInput {
-  player1: PlayerCreateOneWithoutGamesStartedInput;
-  player2: PlayerCreateOneWithoutGamesJoinedInput;
-  roundsNum?: Int;
-  rounds?: RoundCreateManyInput;
-  player1Score?: Int;
-  player2Score?: Int;
-  currentRound: Int;
-  gameInProgress?: Boolean;
-  Winner?: PlayerCreateOneWithoutGamesWonInput;
+export interface PlayerUpdateWithoutGamesJoinedDataInput {
+  name?: String;
+  email?: String;
+  gamesStarted?: GameUpdateManyWithoutPlayer1Input;
+  gamesWon?: GameUpdateManyWithoutWinnerInput;
+}
+
+export interface GameUpdateManyWithoutPlayer1Input {
+  create?: GameCreateWithoutPlayer1Input[] | GameCreateWithoutPlayer1Input;
+  delete?: GameWhereUniqueInput[] | GameWhereUniqueInput;
+  connect?: GameWhereUniqueInput[] | GameWhereUniqueInput;
+  disconnect?: GameWhereUniqueInput[] | GameWhereUniqueInput;
+  update?:
+    | GameUpdateWithWhereUniqueWithoutPlayer1Input[]
+    | GameUpdateWithWhereUniqueWithoutPlayer1Input;
+  upsert?:
+    | GameUpsertWithWhereUniqueWithoutPlayer1Input[]
+    | GameUpsertWithWhereUniqueWithoutPlayer1Input;
+  deleteMany?: GameScalarWhereInput[] | GameScalarWhereInput;
+  updateMany?:
+    | GameUpdateManyWithWhereNestedInput[]
+    | GameUpdateManyWithWhereNestedInput;
 }
 
 export interface PlayerUpdateOneRequiredWithoutGamesJoinedInput {
@@ -316,27 +368,14 @@ export interface PlayerUpdateOneRequiredWithoutGamesJoinedInput {
   connect?: PlayerWhereUniqueInput;
 }
 
-export interface PlayerCreateOneWithoutGamesStartedInput {
-  create?: PlayerCreateWithoutGamesStartedInput;
+export interface PlayerCreateOneWithoutGamesJoinedInput {
+  create?: PlayerCreateWithoutGamesJoinedInput;
   connect?: PlayerWhereUniqueInput;
 }
 
-export interface GameCreateWithoutWinnerInput {
-  player1: PlayerCreateOneWithoutGamesStartedInput;
-  player2: PlayerCreateOneWithoutGamesJoinedInput;
-  roundsNum?: Int;
-  rounds?: RoundCreateManyInput;
-  player1Score?: Int;
-  player2Score?: Int;
-  currentRound: Int;
-  gameInProgress?: Boolean;
-}
-
-export interface PlayerCreateWithoutGamesStartedInput {
-  name: String;
-  email?: String;
-  gamesJoined?: GameCreateManyWithoutPlayer2Input;
-  gamesWon?: GameCreateManyWithoutWinnerInput;
+export interface CardInstanceCreateInput {
+  card: CardCreateOneInput;
+  orderIndex?: Int;
 }
 
 export interface PlayerSubscriptionWhereInput {
@@ -350,9 +389,28 @@ export interface PlayerSubscriptionWhereInput {
   NOT?: PlayerSubscriptionWhereInput[] | PlayerSubscriptionWhereInput;
 }
 
-export interface GameCreateManyWithoutPlayer2Input {
-  create?: GameCreateWithoutPlayer2Input[] | GameCreateWithoutPlayer2Input;
-  connect?: GameWhereUniqueInput[] | GameWhereUniqueInput;
+export interface CardCreateOneInput {
+  create?: CardCreateInput;
+  connect?: CardWhereUniqueInput;
+}
+
+export interface CardInstanceWhereInput {
+  card?: CardWhereInput;
+  orderIndex?: Int;
+  orderIndex_not?: Int;
+  orderIndex_in?: Int[] | Int;
+  orderIndex_not_in?: Int[] | Int;
+  orderIndex_lt?: Int;
+  orderIndex_lte?: Int;
+  orderIndex_gt?: Int;
+  orderIndex_gte?: Int;
+  AND?: CardInstanceWhereInput[] | CardInstanceWhereInput;
+  OR?: CardInstanceWhereInput[] | CardInstanceWhereInput;
+  NOT?: CardInstanceWhereInput[] | CardInstanceWhereInput;
+}
+
+export interface CardInstanceUpdateManyMutationInput {
+  orderIndex?: Int;
 }
 
 export interface CardSubscriptionWhereInput {
@@ -366,6 +424,125 @@ export interface CardSubscriptionWhereInput {
   NOT?: CardSubscriptionWhereInput[] | CardSubscriptionWhereInput;
 }
 
+export interface GameCreateInput {
+  player1: PlayerCreateOneWithoutGamesStartedInput;
+  player2: PlayerCreateOneWithoutGamesJoinedInput;
+  roundsNum?: Int;
+  rounds?: RoundCreateManyInput;
+  player1Score?: Int;
+  player2Score?: Int;
+  currentRound: Int;
+  gameInProgress?: Boolean;
+  Winner?: PlayerCreateOneWithoutGamesWonInput;
+}
+
+export interface PlayerUpdateManyMutationInput {
+  name?: String;
+  email?: String;
+}
+
+export interface PlayerCreateOneWithoutGamesStartedInput {
+  create?: PlayerCreateWithoutGamesStartedInput;
+  connect?: PlayerWhereUniqueInput;
+}
+
+export type GameWhereUniqueInput = AtLeastOne<{
+  id: ID_Input;
+}>;
+
+export interface PlayerCreateWithoutGamesStartedInput {
+  name: String;
+  email?: String;
+  gamesJoined?: GameCreateManyWithoutPlayer2Input;
+  gamesWon?: GameCreateManyWithoutWinnerInput;
+}
+
+export interface GameUpdateManyMutationInput {
+  roundsNum?: Int;
+  player1Score?: Int;
+  player2Score?: Int;
+  currentRound?: Int;
+  gameInProgress?: Boolean;
+}
+
+export interface GameCreateManyWithoutPlayer2Input {
+  create?: GameCreateWithoutPlayer2Input[] | GameCreateWithoutPlayer2Input;
+  connect?: GameWhereUniqueInput[] | GameWhereUniqueInput;
+}
+
+export interface PlayerWhereInput {
+  id?: ID_Input;
+  id_not?: ID_Input;
+  id_in?: ID_Input[] | ID_Input;
+  id_not_in?: ID_Input[] | ID_Input;
+  id_lt?: ID_Input;
+  id_lte?: ID_Input;
+  id_gt?: ID_Input;
+  id_gte?: ID_Input;
+  id_contains?: ID_Input;
+  id_not_contains?: ID_Input;
+  id_starts_with?: ID_Input;
+  id_not_starts_with?: ID_Input;
+  id_ends_with?: ID_Input;
+  id_not_ends_with?: ID_Input;
+  createdAt?: DateTimeInput;
+  createdAt_not?: DateTimeInput;
+  createdAt_in?: DateTimeInput[] | DateTimeInput;
+  createdAt_not_in?: DateTimeInput[] | DateTimeInput;
+  createdAt_lt?: DateTimeInput;
+  createdAt_lte?: DateTimeInput;
+  createdAt_gt?: DateTimeInput;
+  createdAt_gte?: DateTimeInput;
+  updatedAt?: DateTimeInput;
+  updatedAt_not?: DateTimeInput;
+  updatedAt_in?: DateTimeInput[] | DateTimeInput;
+  updatedAt_not_in?: DateTimeInput[] | DateTimeInput;
+  updatedAt_lt?: DateTimeInput;
+  updatedAt_lte?: DateTimeInput;
+  updatedAt_gt?: DateTimeInput;
+  updatedAt_gte?: DateTimeInput;
+  name?: String;
+  name_not?: String;
+  name_in?: String[] | String;
+  name_not_in?: String[] | String;
+  name_lt?: String;
+  name_lte?: String;
+  name_gt?: String;
+  name_gte?: String;
+  name_contains?: String;
+  name_not_contains?: String;
+  name_starts_with?: String;
+  name_not_starts_with?: String;
+  name_ends_with?: String;
+  name_not_ends_with?: String;
+  email?: String;
+  email_not?: String;
+  email_in?: String[] | String;
+  email_not_in?: String[] | String;
+  email_lt?: String;
+  email_lte?: String;
+  email_gt?: String;
+  email_gte?: String;
+  email_contains?: String;
+  email_not_contains?: String;
+  email_starts_with?: String;
+  email_not_starts_with?: String;
+  email_ends_with?: String;
+  email_not_ends_with?: String;
+  gamesStarted_every?: GameWhereInput;
+  gamesStarted_some?: GameWhereInput;
+  gamesStarted_none?: GameWhereInput;
+  gamesJoined_every?: GameWhereInput;
+  gamesJoined_some?: GameWhereInput;
+  gamesJoined_none?: GameWhereInput;
+  gamesWon_every?: GameWhereInput;
+  gamesWon_some?: GameWhereInput;
+  gamesWon_none?: GameWhereInput;
+  AND?: PlayerWhereInput[] | PlayerWhereInput;
+  OR?: PlayerWhereInput[] | PlayerWhereInput;
+  NOT?: PlayerWhereInput[] | PlayerWhereInput;
+}
+
 export interface GameCreateWithoutPlayer2Input {
   player1: PlayerCreateOneWithoutGamesStartedInput;
   roundsNum?: Int;
@@ -377,13 +554,205 @@ export interface GameCreateWithoutPlayer2Input {
   Winner?: PlayerCreateOneWithoutGamesWonInput;
 }
 
-export interface RoundUpdateManyMutationInput {
-  player1Score?: Int;
-  player2Score?: Int;
+export interface CardWhereInput {
+  id?: ID_Input;
+  id_not?: ID_Input;
+  id_in?: ID_Input[] | ID_Input;
+  id_not_in?: ID_Input[] | ID_Input;
+  id_lt?: ID_Input;
+  id_lte?: ID_Input;
+  id_gt?: ID_Input;
+  id_gte?: ID_Input;
+  id_contains?: ID_Input;
+  id_not_contains?: ID_Input;
+  id_starts_with?: ID_Input;
+  id_not_starts_with?: ID_Input;
+  id_ends_with?: ID_Input;
+  id_not_ends_with?: ID_Input;
+  createdAt?: DateTimeInput;
+  createdAt_not?: DateTimeInput;
+  createdAt_in?: DateTimeInput[] | DateTimeInput;
+  createdAt_not_in?: DateTimeInput[] | DateTimeInput;
+  createdAt_lt?: DateTimeInput;
+  createdAt_lte?: DateTimeInput;
+  createdAt_gt?: DateTimeInput;
+  createdAt_gte?: DateTimeInput;
+  updatedAt?: DateTimeInput;
+  updatedAt_not?: DateTimeInput;
+  updatedAt_in?: DateTimeInput[] | DateTimeInput;
+  updatedAt_not_in?: DateTimeInput[] | DateTimeInput;
+  updatedAt_lt?: DateTimeInput;
+  updatedAt_lte?: DateTimeInput;
+  updatedAt_gt?: DateTimeInput;
+  updatedAt_gte?: DateTimeInput;
+  cardType?: CardTypes;
+  cardType_not?: CardTypes;
+  cardType_in?: CardTypes[] | CardTypes;
+  cardType_not_in?: CardTypes[] | CardTypes;
+  expeditionValue?: Int;
+  expeditionValue_not?: Int;
+  expeditionValue_in?: Int[] | Int;
+  expeditionValue_not_in?: Int[] | Int;
+  expeditionValue_lt?: Int;
+  expeditionValue_lte?: Int;
+  expeditionValue_gt?: Int;
+  expeditionValue_gte?: Int;
+  color?: Colors;
+  color_not?: Colors;
+  color_in?: Colors[] | Colors;
+  color_not_in?: Colors[] | Colors;
+  AND?: CardWhereInput[] | CardWhereInput;
+  OR?: CardWhereInput[] | CardWhereInput;
+  NOT?: CardWhereInput[] | CardWhereInput;
 }
 
 export interface RoundCreateManyInput {
   create?: RoundCreateInput[] | RoundCreateInput;
+}
+
+export interface GameUpsertWithWhereUniqueWithoutPlayer2Input {
+  where: GameWhereUniqueInput;
+  update: GameUpdateWithoutPlayer2DataInput;
+  create: GameCreateWithoutPlayer2Input;
+}
+
+export interface RoundCreateInput {
+  drawDeck?: CardInstanceCreateManyInput;
+  player1Hand?: CardCreateManyInput;
+  player1Tableau?: CardCreateManyInput;
+  player1Score: Int;
+  player2Hand?: CardCreateManyInput;
+  player2Tableau?: CardCreateManyInput;
+  player2Score: Int;
+  discardPile?: CardInstanceCreateManyInput;
+}
+
+export interface GameUpsertWithWhereUniqueWithoutPlayer1Input {
+  where: GameWhereUniqueInput;
+  update: GameUpdateWithoutPlayer1DataInput;
+  create: GameCreateWithoutPlayer1Input;
+}
+
+export interface CardInstanceCreateManyInput {
+  create?: CardInstanceCreateInput[] | CardInstanceCreateInput;
+}
+
+export type PlayerWhereUniqueInput = AtLeastOne<{
+  id: ID_Input;
+}>;
+
+export interface GameUpdateWithoutPlayer1DataInput {
+  player2?: PlayerUpdateOneRequiredWithoutGamesJoinedInput;
+  roundsNum?: Int;
+  rounds?: RoundUpdateManyInput;
+  player1Score?: Int;
+  player2Score?: Int;
+  currentRound?: Int;
+  gameInProgress?: Boolean;
+  Winner?: PlayerUpdateOneWithoutGamesWonInput;
+}
+
+export interface GameUpdateManyWithWhereNestedInput {
+  where: GameScalarWhereInput;
+  data: GameUpdateManyDataInput;
+}
+
+export interface PlayerCreateOneWithoutGamesWonInput {
+  create?: PlayerCreateWithoutGamesWonInput;
+  connect?: PlayerWhereUniqueInput;
+}
+
+export interface GameUpsertWithWhereUniqueWithoutWinnerInput {
+  where: GameWhereUniqueInput;
+  update: GameUpdateWithoutWinnerDataInput;
+  create: GameCreateWithoutWinnerInput;
+}
+
+export interface PlayerCreateWithoutGamesWonInput {
+  name: String;
+  email?: String;
+  gamesStarted?: GameCreateManyWithoutPlayer1Input;
+  gamesJoined?: GameCreateManyWithoutPlayer2Input;
+}
+
+export interface GameUpdateWithWhereUniqueWithoutWinnerInput {
+  where: GameWhereUniqueInput;
+  data: GameUpdateWithoutWinnerDataInput;
+}
+
+export interface GameCreateManyWithoutPlayer1Input {
+  create?: GameCreateWithoutPlayer1Input[] | GameCreateWithoutPlayer1Input;
+  connect?: GameWhereUniqueInput[] | GameWhereUniqueInput;
+}
+
+export interface CardUpdateInput {
+  cardType?: CardTypes;
+  expeditionValue?: Int;
+  color?: Colors;
+}
+
+export interface GameCreateWithoutPlayer1Input {
+  player2: PlayerCreateOneWithoutGamesJoinedInput;
+  roundsNum?: Int;
+  rounds?: RoundCreateManyInput;
+  player1Score?: Int;
+  player2Score?: Int;
+  currentRound: Int;
+  gameInProgress?: Boolean;
+  Winner?: PlayerCreateOneWithoutGamesWonInput;
+}
+
+export interface RoundSubscriptionWhereInput {
+  mutation_in?: MutationType[] | MutationType;
+  updatedFields_contains?: String;
+  updatedFields_contains_every?: String[] | String;
+  updatedFields_contains_some?: String[] | String;
+  node?: RoundWhereInput;
+  AND?: RoundSubscriptionWhereInput[] | RoundSubscriptionWhereInput;
+  OR?: RoundSubscriptionWhereInput[] | RoundSubscriptionWhereInput;
+  NOT?: RoundSubscriptionWhereInput[] | RoundSubscriptionWhereInput;
+}
+
+export interface GameUpdateWithWhereUniqueWithoutPlayer1Input {
+  where: GameWhereUniqueInput;
+  data: GameUpdateWithoutPlayer1DataInput;
+}
+
+export interface CardInstanceSubscriptionWhereInput {
+  mutation_in?: MutationType[] | MutationType;
+  updatedFields_contains?: String;
+  updatedFields_contains_every?: String[] | String;
+  updatedFields_contains_some?: String[] | String;
+  node?: CardInstanceWhereInput;
+  AND?:
+    | CardInstanceSubscriptionWhereInput[]
+    | CardInstanceSubscriptionWhereInput;
+  OR?:
+    | CardInstanceSubscriptionWhereInput[]
+    | CardInstanceSubscriptionWhereInput;
+  NOT?:
+    | CardInstanceSubscriptionWhereInput[]
+    | CardInstanceSubscriptionWhereInput;
+}
+
+export interface PlayerCreateWithoutGamesJoinedInput {
+  name: String;
+  email?: String;
+  gamesStarted?: GameCreateManyWithoutPlayer1Input;
+  gamesWon?: GameCreateManyWithoutWinnerInput;
+}
+
+export interface PlayerUpdateInput {
+  name?: String;
+  email?: String;
+  gamesStarted?: GameUpdateManyWithoutPlayer1Input;
+  gamesJoined?: GameUpdateManyWithoutPlayer2Input;
+  gamesWon?: GameUpdateManyWithoutWinnerInput;
+}
+
+export interface GameCreateManyWithoutWinnerInput {
+  create?: GameCreateWithoutWinnerInput[] | GameCreateWithoutWinnerInput;
+  connect?: GameWhereUniqueInput[] | GameWhereUniqueInput;
 }
 
 export interface GameWhereInput {
@@ -462,181 +831,20 @@ export interface GameWhereInput {
   NOT?: GameWhereInput[] | GameWhereInput;
 }
 
-export interface RoundCreateInput {
-  drawDeck?: CardCreateManyInput;
-  player1Hand?: CardCreateManyInput;
-  player1Tableau?: CardCreateManyInput;
-  player1Score: Int;
-  player2Hand?: CardCreateManyInput;
-  player2Tableau?: CardCreateManyInput;
-  player2Score: Int;
-  discardPile?: CardCreateManyInput;
-}
-
-export interface RoundWhereInput {
-  createdAt?: DateTimeInput;
-  createdAt_not?: DateTimeInput;
-  createdAt_in?: DateTimeInput[] | DateTimeInput;
-  createdAt_not_in?: DateTimeInput[] | DateTimeInput;
-  createdAt_lt?: DateTimeInput;
-  createdAt_lte?: DateTimeInput;
-  createdAt_gt?: DateTimeInput;
-  createdAt_gte?: DateTimeInput;
-  drawDeck_every?: CardWhereInput;
-  drawDeck_some?: CardWhereInput;
-  drawDeck_none?: CardWhereInput;
-  player1Hand_every?: CardWhereInput;
-  player1Hand_some?: CardWhereInput;
-  player1Hand_none?: CardWhereInput;
-  player1Tableau_every?: CardWhereInput;
-  player1Tableau_some?: CardWhereInput;
-  player1Tableau_none?: CardWhereInput;
-  player1Score?: Int;
-  player1Score_not?: Int;
-  player1Score_in?: Int[] | Int;
-  player1Score_not_in?: Int[] | Int;
-  player1Score_lt?: Int;
-  player1Score_lte?: Int;
-  player1Score_gt?: Int;
-  player1Score_gte?: Int;
-  player2Hand_every?: CardWhereInput;
-  player2Hand_some?: CardWhereInput;
-  player2Hand_none?: CardWhereInput;
-  player2Tableau_every?: CardWhereInput;
-  player2Tableau_some?: CardWhereInput;
-  player2Tableau_none?: CardWhereInput;
-  player2Score?: Int;
-  player2Score_not?: Int;
-  player2Score_in?: Int[] | Int;
-  player2Score_not_in?: Int[] | Int;
-  player2Score_lt?: Int;
-  player2Score_lte?: Int;
-  player2Score_gt?: Int;
-  player2Score_gte?: Int;
-  discardPile_every?: CardWhereInput;
-  discardPile_some?: CardWhereInput;
-  discardPile_none?: CardWhereInput;
-  AND?: RoundWhereInput[] | RoundWhereInput;
-  OR?: RoundWhereInput[] | RoundWhereInput;
-  NOT?: RoundWhereInput[] | RoundWhereInput;
-}
-
-export interface CardCreateManyInput {
-  create?: CardCreateInput[] | CardCreateInput;
-  connect?: CardWhereUniqueInput[] | CardWhereUniqueInput;
-}
-
-export interface PlayerUpdateInput {
-  name?: String;
-  email?: String;
-  gamesStarted?: GameUpdateManyWithoutPlayer1Input;
-  gamesJoined?: GameUpdateManyWithoutPlayer2Input;
-  gamesWon?: GameUpdateManyWithoutWinnerInput;
-}
-
-export interface PlayerCreateOneWithoutGamesWonInput {
-  create?: PlayerCreateWithoutGamesWonInput;
-  connect?: PlayerWhereUniqueInput;
-}
-
-export interface GameUpdateManyMutationInput {
+export interface GameCreateWithoutWinnerInput {
+  player1: PlayerCreateOneWithoutGamesStartedInput;
+  player2: PlayerCreateOneWithoutGamesJoinedInput;
   roundsNum?: Int;
+  rounds?: RoundCreateManyInput;
   player1Score?: Int;
   player2Score?: Int;
-  currentRound?: Int;
+  currentRound: Int;
   gameInProgress?: Boolean;
 }
 
-export interface PlayerCreateWithoutGamesWonInput {
-  name: String;
-  email?: String;
-  gamesStarted?: GameCreateManyWithoutPlayer1Input;
-  gamesJoined?: GameCreateManyWithoutPlayer2Input;
-}
-
-export interface GameUpsertWithWhereUniqueWithoutPlayer2Input {
-  where: GameWhereUniqueInput;
-  update: GameUpdateWithoutPlayer2DataInput;
-  create: GameCreateWithoutPlayer2Input;
-}
-
-export interface GameCreateManyWithoutPlayer1Input {
-  create?: GameCreateWithoutPlayer1Input[] | GameCreateWithoutPlayer1Input;
-  connect?: GameWhereUniqueInput[] | GameWhereUniqueInput;
-}
-
-export interface PlayerUpsertWithoutGamesWonInput {
-  update: PlayerUpdateWithoutGamesWonDataInput;
-  create: PlayerCreateWithoutGamesWonInput;
-}
-
-export interface GameUpdateManyWithoutWinnerInput {
-  create?: GameCreateWithoutWinnerInput[] | GameCreateWithoutWinnerInput;
-  delete?: GameWhereUniqueInput[] | GameWhereUniqueInput;
-  connect?: GameWhereUniqueInput[] | GameWhereUniqueInput;
-  disconnect?: GameWhereUniqueInput[] | GameWhereUniqueInput;
-  update?:
-    | GameUpdateWithWhereUniqueWithoutWinnerInput[]
-    | GameUpdateWithWhereUniqueWithoutWinnerInput;
-  upsert?:
-    | GameUpsertWithWhereUniqueWithoutWinnerInput[]
-    | GameUpsertWithWhereUniqueWithoutWinnerInput;
-  deleteMany?: GameScalarWhereInput[] | GameScalarWhereInput;
-  updateMany?:
-    | GameUpdateManyWithWhereNestedInput[]
-    | GameUpdateManyWithWhereNestedInput;
-}
-
-export interface PlayerUpsertWithoutGamesJoinedInput {
-  update: PlayerUpdateWithoutGamesJoinedDataInput;
-  create: PlayerCreateWithoutGamesJoinedInput;
-}
-
-export interface PlayerCreateOneWithoutGamesJoinedInput {
-  create?: PlayerCreateWithoutGamesJoinedInput;
-  connect?: PlayerWhereUniqueInput;
-}
-
-export interface GameUpdateManyWithWhereNestedInput {
-  where: GameScalarWhereInput;
-  data: GameUpdateManyDataInput;
-}
-
-export interface PlayerCreateWithoutGamesJoinedInput {
-  name: String;
-  email?: String;
-  gamesStarted?: GameCreateManyWithoutPlayer1Input;
-  gamesWon?: GameCreateManyWithoutWinnerInput;
-}
-
-export interface GameUpsertWithWhereUniqueWithoutWinnerInput {
-  where: GameWhereUniqueInput;
-  update: GameUpdateWithoutWinnerDataInput;
-  create: GameCreateWithoutWinnerInput;
-}
-
-export interface GameCreateManyWithoutWinnerInput {
-  create?: GameCreateWithoutWinnerInput[] | GameCreateWithoutWinnerInput;
-  connect?: GameWhereUniqueInput[] | GameWhereUniqueInput;
-}
-
-export interface CardCreateInput {
-  cardType: CardTypes;
-  expeditionValue?: Int;
-  color: Colors;
-}
-
-export interface PlayerUpdateWithoutGamesJoinedDataInput {
-  name?: String;
-  email?: String;
-  gamesStarted?: GameUpdateManyWithoutPlayer1Input;
-  gamesWon?: GameUpdateManyWithoutWinnerInput;
-}
-
-export interface CardUpdateManyMutationInput {
-  cardType?: CardTypes;
-  expeditionValue?: Int;
-  color?: Colors;
+export interface PlayerUpsertWithoutGamesStartedInput {
+  update: PlayerUpdateWithoutGamesStartedDataInput;
+  create: PlayerCreateWithoutGamesStartedInput;
 }
 
 export interface GameUpdateInput {
@@ -651,9 +859,9 @@ export interface GameUpdateInput {
   Winner?: PlayerUpdateOneWithoutGamesWonInput;
 }
 
-export interface GameUpdateWithWhereUniqueWithoutWinnerInput {
-  where: GameWhereUniqueInput;
-  data: GameUpdateWithoutWinnerDataInput;
+export interface PlayerUpsertWithoutGamesJoinedInput {
+  update: PlayerUpdateWithoutGamesJoinedDataInput;
+  create: PlayerCreateWithoutGamesJoinedInput;
 }
 
 export interface PlayerUpdateOneRequiredWithoutGamesStartedInput {
@@ -661,133 +869,6 @@ export interface PlayerUpdateOneRequiredWithoutGamesStartedInput {
   update?: PlayerUpdateWithoutGamesStartedDataInput;
   upsert?: PlayerUpsertWithoutGamesStartedInput;
   connect?: PlayerWhereUniqueInput;
-}
-
-export interface GameSubscriptionWhereInput {
-  mutation_in?: MutationType[] | MutationType;
-  updatedFields_contains?: String;
-  updatedFields_contains_every?: String[] | String;
-  updatedFields_contains_some?: String[] | String;
-  node?: GameWhereInput;
-  AND?: GameSubscriptionWhereInput[] | GameSubscriptionWhereInput;
-  OR?: GameSubscriptionWhereInput[] | GameSubscriptionWhereInput;
-  NOT?: GameSubscriptionWhereInput[] | GameSubscriptionWhereInput;
-}
-
-export interface PlayerUpdateWithoutGamesStartedDataInput {
-  name?: String;
-  email?: String;
-  gamesJoined?: GameUpdateManyWithoutPlayer2Input;
-  gamesWon?: GameUpdateManyWithoutWinnerInput;
-}
-
-export interface PlayerUpdateManyMutationInput {
-  name?: String;
-  email?: String;
-}
-
-export interface GameUpdateManyWithoutPlayer2Input {
-  create?: GameCreateWithoutPlayer2Input[] | GameCreateWithoutPlayer2Input;
-  delete?: GameWhereUniqueInput[] | GameWhereUniqueInput;
-  connect?: GameWhereUniqueInput[] | GameWhereUniqueInput;
-  disconnect?: GameWhereUniqueInput[] | GameWhereUniqueInput;
-  update?:
-    | GameUpdateWithWhereUniqueWithoutPlayer2Input[]
-    | GameUpdateWithWhereUniqueWithoutPlayer2Input;
-  upsert?:
-    | GameUpsertWithWhereUniqueWithoutPlayer2Input[]
-    | GameUpsertWithWhereUniqueWithoutPlayer2Input;
-  deleteMany?: GameScalarWhereInput[] | GameScalarWhereInput;
-  updateMany?:
-    | GameUpdateManyWithWhereNestedInput[]
-    | GameUpdateManyWithWhereNestedInput;
-}
-
-export interface CardWhereInput {
-  id?: ID_Input;
-  id_not?: ID_Input;
-  id_in?: ID_Input[] | ID_Input;
-  id_not_in?: ID_Input[] | ID_Input;
-  id_lt?: ID_Input;
-  id_lte?: ID_Input;
-  id_gt?: ID_Input;
-  id_gte?: ID_Input;
-  id_contains?: ID_Input;
-  id_not_contains?: ID_Input;
-  id_starts_with?: ID_Input;
-  id_not_starts_with?: ID_Input;
-  id_ends_with?: ID_Input;
-  id_not_ends_with?: ID_Input;
-  createdAt?: DateTimeInput;
-  createdAt_not?: DateTimeInput;
-  createdAt_in?: DateTimeInput[] | DateTimeInput;
-  createdAt_not_in?: DateTimeInput[] | DateTimeInput;
-  createdAt_lt?: DateTimeInput;
-  createdAt_lte?: DateTimeInput;
-  createdAt_gt?: DateTimeInput;
-  createdAt_gte?: DateTimeInput;
-  updatedAt?: DateTimeInput;
-  updatedAt_not?: DateTimeInput;
-  updatedAt_in?: DateTimeInput[] | DateTimeInput;
-  updatedAt_not_in?: DateTimeInput[] | DateTimeInput;
-  updatedAt_lt?: DateTimeInput;
-  updatedAt_lte?: DateTimeInput;
-  updatedAt_gt?: DateTimeInput;
-  updatedAt_gte?: DateTimeInput;
-  cardType?: CardTypes;
-  cardType_not?: CardTypes;
-  cardType_in?: CardTypes[] | CardTypes;
-  cardType_not_in?: CardTypes[] | CardTypes;
-  expeditionValue?: Int;
-  expeditionValue_not?: Int;
-  expeditionValue_in?: Int[] | Int;
-  expeditionValue_not_in?: Int[] | Int;
-  expeditionValue_lt?: Int;
-  expeditionValue_lte?: Int;
-  expeditionValue_gt?: Int;
-  expeditionValue_gte?: Int;
-  color?: Colors;
-  color_not?: Colors;
-  color_in?: Colors[] | Colors;
-  color_not_in?: Colors[] | Colors;
-  AND?: CardWhereInput[] | CardWhereInput;
-  OR?: CardWhereInput[] | CardWhereInput;
-  NOT?: CardWhereInput[] | CardWhereInput;
-}
-
-export interface GameUpdateWithWhereUniqueWithoutPlayer2Input {
-  where: GameWhereUniqueInput;
-  data: GameUpdateWithoutPlayer2DataInput;
-}
-
-export interface PlayerUpsertWithoutGamesStartedInput {
-  update: PlayerUpdateWithoutGamesStartedDataInput;
-  create: PlayerCreateWithoutGamesStartedInput;
-}
-
-export interface GameUpdateWithoutPlayer2DataInput {
-  player1?: PlayerUpdateOneRequiredWithoutGamesStartedInput;
-  roundsNum?: Int;
-  rounds?: RoundUpdateManyInput;
-  player1Score?: Int;
-  player2Score?: Int;
-  currentRound?: Int;
-  gameInProgress?: Boolean;
-  Winner?: PlayerUpdateOneWithoutGamesWonInput;
-}
-
-export interface GameUpsertWithWhereUniqueWithoutPlayer1Input {
-  where: GameWhereUniqueInput;
-  update: GameUpdateWithoutPlayer1DataInput;
-  create: GameCreateWithoutPlayer1Input;
-}
-
-export interface RoundUpdateManyInput {
-  create?: RoundCreateInput[] | RoundCreateInput;
-  deleteMany?: RoundScalarWhereInput[] | RoundScalarWhereInput;
-  updateMany?:
-    | RoundUpdateManyWithWhereNestedInput[]
-    | RoundUpdateManyWithWhereNestedInput;
 }
 
 export interface GameScalarWhereInput {
@@ -860,6 +941,138 @@ export interface GameScalarWhereInput {
   NOT?: GameScalarWhereInput[] | GameScalarWhereInput;
 }
 
+export interface PlayerUpdateWithoutGamesStartedDataInput {
+  name?: String;
+  email?: String;
+  gamesJoined?: GameUpdateManyWithoutPlayer2Input;
+  gamesWon?: GameUpdateManyWithoutWinnerInput;
+}
+
+export interface GameUpdateManyWithoutWinnerInput {
+  create?: GameCreateWithoutWinnerInput[] | GameCreateWithoutWinnerInput;
+  delete?: GameWhereUniqueInput[] | GameWhereUniqueInput;
+  connect?: GameWhereUniqueInput[] | GameWhereUniqueInput;
+  disconnect?: GameWhereUniqueInput[] | GameWhereUniqueInput;
+  update?:
+    | GameUpdateWithWhereUniqueWithoutWinnerInput[]
+    | GameUpdateWithWhereUniqueWithoutWinnerInput;
+  upsert?:
+    | GameUpsertWithWhereUniqueWithoutWinnerInput[]
+    | GameUpsertWithWhereUniqueWithoutWinnerInput;
+  deleteMany?: GameScalarWhereInput[] | GameScalarWhereInput;
+  updateMany?:
+    | GameUpdateManyWithWhereNestedInput[]
+    | GameUpdateManyWithWhereNestedInput;
+}
+
+export interface GameUpdateManyWithoutPlayer2Input {
+  create?: GameCreateWithoutPlayer2Input[] | GameCreateWithoutPlayer2Input;
+  delete?: GameWhereUniqueInput[] | GameWhereUniqueInput;
+  connect?: GameWhereUniqueInput[] | GameWhereUniqueInput;
+  disconnect?: GameWhereUniqueInput[] | GameWhereUniqueInput;
+  update?:
+    | GameUpdateWithWhereUniqueWithoutPlayer2Input[]
+    | GameUpdateWithWhereUniqueWithoutPlayer2Input;
+  upsert?:
+    | GameUpsertWithWhereUniqueWithoutPlayer2Input[]
+    | GameUpsertWithWhereUniqueWithoutPlayer2Input;
+  deleteMany?: GameScalarWhereInput[] | GameScalarWhereInput;
+  updateMany?:
+    | GameUpdateManyWithWhereNestedInput[]
+    | GameUpdateManyWithWhereNestedInput;
+}
+
+export interface CardUpdateManyMutationInput {
+  cardType?: CardTypes;
+  expeditionValue?: Int;
+  color?: Colors;
+}
+
+export interface GameUpdateWithWhereUniqueWithoutPlayer2Input {
+  where: GameWhereUniqueInput;
+  data: GameUpdateWithoutPlayer2DataInput;
+}
+
+export interface RoundUpdateManyMutationInput {
+  player1Score?: Int;
+  player2Score?: Int;
+}
+
+export interface GameUpdateWithoutPlayer2DataInput {
+  player1?: PlayerUpdateOneRequiredWithoutGamesStartedInput;
+  roundsNum?: Int;
+  rounds?: RoundUpdateManyInput;
+  player1Score?: Int;
+  player2Score?: Int;
+  currentRound?: Int;
+  gameInProgress?: Boolean;
+  Winner?: PlayerUpdateOneWithoutGamesWonInput;
+}
+
+export interface RoundWhereInput {
+  createdAt?: DateTimeInput;
+  createdAt_not?: DateTimeInput;
+  createdAt_in?: DateTimeInput[] | DateTimeInput;
+  createdAt_not_in?: DateTimeInput[] | DateTimeInput;
+  createdAt_lt?: DateTimeInput;
+  createdAt_lte?: DateTimeInput;
+  createdAt_gt?: DateTimeInput;
+  createdAt_gte?: DateTimeInput;
+  drawDeck_every?: CardInstanceWhereInput;
+  drawDeck_some?: CardInstanceWhereInput;
+  drawDeck_none?: CardInstanceWhereInput;
+  player1Hand_every?: CardWhereInput;
+  player1Hand_some?: CardWhereInput;
+  player1Hand_none?: CardWhereInput;
+  player1Tableau_every?: CardWhereInput;
+  player1Tableau_some?: CardWhereInput;
+  player1Tableau_none?: CardWhereInput;
+  player1Score?: Int;
+  player1Score_not?: Int;
+  player1Score_in?: Int[] | Int;
+  player1Score_not_in?: Int[] | Int;
+  player1Score_lt?: Int;
+  player1Score_lte?: Int;
+  player1Score_gt?: Int;
+  player1Score_gte?: Int;
+  player2Hand_every?: CardWhereInput;
+  player2Hand_some?: CardWhereInput;
+  player2Hand_none?: CardWhereInput;
+  player2Tableau_every?: CardWhereInput;
+  player2Tableau_some?: CardWhereInput;
+  player2Tableau_none?: CardWhereInput;
+  player2Score?: Int;
+  player2Score_not?: Int;
+  player2Score_in?: Int[] | Int;
+  player2Score_not_in?: Int[] | Int;
+  player2Score_lt?: Int;
+  player2Score_lte?: Int;
+  player2Score_gt?: Int;
+  player2Score_gte?: Int;
+  discardPile_every?: CardInstanceWhereInput;
+  discardPile_some?: CardInstanceWhereInput;
+  discardPile_none?: CardInstanceWhereInput;
+  AND?: RoundWhereInput[] | RoundWhereInput;
+  OR?: RoundWhereInput[] | RoundWhereInput;
+  NOT?: RoundWhereInput[] | RoundWhereInput;
+}
+
+export interface RoundUpdateManyInput {
+  create?: RoundCreateInput[] | RoundCreateInput;
+  deleteMany?: RoundScalarWhereInput[] | RoundScalarWhereInput;
+  updateMany?:
+    | RoundUpdateManyWithWhereNestedInput[]
+    | RoundUpdateManyWithWhereNestedInput;
+}
+
+export interface GameUpdateManyDataInput {
+  roundsNum?: Int;
+  player1Score?: Int;
+  player2Score?: Int;
+  currentRound?: Int;
+  gameInProgress?: Boolean;
+}
+
 export interface RoundScalarWhereInput {
   createdAt?: DateTimeInput;
   createdAt_not?: DateTimeInput;
@@ -890,104 +1103,17 @@ export interface RoundScalarWhereInput {
   NOT?: RoundScalarWhereInput[] | RoundScalarWhereInput;
 }
 
-export interface CardUpdateInput {
-  cardType?: CardTypes;
+export interface CardCreateInput {
+  cardType: CardTypes;
   expeditionValue?: Int;
-  color?: Colors;
+  color: Colors;
 }
 
-export interface RoundUpdateManyWithWhereNestedInput {
-  where: RoundScalarWhereInput;
-  data: RoundUpdateManyDataInput;
-}
-
-export interface RoundSubscriptionWhereInput {
-  mutation_in?: MutationType[] | MutationType;
-  updatedFields_contains?: String;
-  updatedFields_contains_every?: String[] | String;
-  updatedFields_contains_some?: String[] | String;
-  node?: RoundWhereInput;
-  AND?: RoundSubscriptionWhereInput[] | RoundSubscriptionWhereInput;
-  OR?: RoundSubscriptionWhereInput[] | RoundSubscriptionWhereInput;
-  NOT?: RoundSubscriptionWhereInput[] | RoundSubscriptionWhereInput;
-}
-
-export interface RoundUpdateManyDataInput {
-  player1Score?: Int;
-  player2Score?: Int;
-}
-
-export interface PlayerWhereInput {
-  id?: ID_Input;
-  id_not?: ID_Input;
-  id_in?: ID_Input[] | ID_Input;
-  id_not_in?: ID_Input[] | ID_Input;
-  id_lt?: ID_Input;
-  id_lte?: ID_Input;
-  id_gt?: ID_Input;
-  id_gte?: ID_Input;
-  id_contains?: ID_Input;
-  id_not_contains?: ID_Input;
-  id_starts_with?: ID_Input;
-  id_not_starts_with?: ID_Input;
-  id_ends_with?: ID_Input;
-  id_not_ends_with?: ID_Input;
-  createdAt?: DateTimeInput;
-  createdAt_not?: DateTimeInput;
-  createdAt_in?: DateTimeInput[] | DateTimeInput;
-  createdAt_not_in?: DateTimeInput[] | DateTimeInput;
-  createdAt_lt?: DateTimeInput;
-  createdAt_lte?: DateTimeInput;
-  createdAt_gt?: DateTimeInput;
-  createdAt_gte?: DateTimeInput;
-  updatedAt?: DateTimeInput;
-  updatedAt_not?: DateTimeInput;
-  updatedAt_in?: DateTimeInput[] | DateTimeInput;
-  updatedAt_not_in?: DateTimeInput[] | DateTimeInput;
-  updatedAt_lt?: DateTimeInput;
-  updatedAt_lte?: DateTimeInput;
-  updatedAt_gt?: DateTimeInput;
-  updatedAt_gte?: DateTimeInput;
+export interface PlayerUpdateWithoutGamesWonDataInput {
   name?: String;
-  name_not?: String;
-  name_in?: String[] | String;
-  name_not_in?: String[] | String;
-  name_lt?: String;
-  name_lte?: String;
-  name_gt?: String;
-  name_gte?: String;
-  name_contains?: String;
-  name_not_contains?: String;
-  name_starts_with?: String;
-  name_not_starts_with?: String;
-  name_ends_with?: String;
-  name_not_ends_with?: String;
   email?: String;
-  email_not?: String;
-  email_in?: String[] | String;
-  email_not_in?: String[] | String;
-  email_lt?: String;
-  email_lte?: String;
-  email_gt?: String;
-  email_gte?: String;
-  email_contains?: String;
-  email_not_contains?: String;
-  email_starts_with?: String;
-  email_not_starts_with?: String;
-  email_ends_with?: String;
-  email_not_ends_with?: String;
-  gamesStarted_every?: GameWhereInput;
-  gamesStarted_some?: GameWhereInput;
-  gamesStarted_none?: GameWhereInput;
-  gamesJoined_every?: GameWhereInput;
-  gamesJoined_some?: GameWhereInput;
-  gamesJoined_none?: GameWhereInput;
-  gamesWon_every?: GameWhereInput;
-  gamesWon_some?: GameWhereInput;
-  gamesWon_none?: GameWhereInput;
-  AND?: PlayerWhereInput[] | PlayerWhereInput;
-  OR?: PlayerWhereInput[] | PlayerWhereInput;
-  NOT?: PlayerWhereInput[] | PlayerWhereInput;
+  gamesStarted?: GameUpdateManyWithoutPlayer1Input;
+  gamesJoined?: GameUpdateManyWithoutPlayer2Input;
 }
 
 export interface PlayerUpdateOneWithoutGamesWonInput {
@@ -999,48 +1125,25 @@ export interface PlayerUpdateOneWithoutGamesWonInput {
   connect?: PlayerWhereUniqueInput;
 }
 
-export type PlayerWhereUniqueInput = AtLeastOne<{
-  id: ID_Input;
-}>;
-
-export interface GameUpdateWithoutPlayer1DataInput {
-  player2?: PlayerUpdateOneRequiredWithoutGamesJoinedInput;
-  roundsNum?: Int;
-  rounds?: RoundUpdateManyInput;
+export interface RoundUpdateManyDataInput {
   player1Score?: Int;
   player2Score?: Int;
-  currentRound?: Int;
-  gameInProgress?: Boolean;
-  Winner?: PlayerUpdateOneWithoutGamesWonInput;
 }
 
-export interface GameUpdateWithWhereUniqueWithoutPlayer1Input {
-  where: GameWhereUniqueInput;
-  data: GameUpdateWithoutPlayer1DataInput;
+export interface RoundUpdateManyWithWhereNestedInput {
+  where: RoundScalarWhereInput;
+  data: RoundUpdateManyDataInput;
 }
 
-export interface GameUpdateManyWithoutPlayer1Input {
-  create?: GameCreateWithoutPlayer1Input[] | GameCreateWithoutPlayer1Input;
-  delete?: GameWhereUniqueInput[] | GameWhereUniqueInput;
-  connect?: GameWhereUniqueInput[] | GameWhereUniqueInput;
-  disconnect?: GameWhereUniqueInput[] | GameWhereUniqueInput;
-  update?:
-    | GameUpdateWithWhereUniqueWithoutPlayer1Input[]
-    | GameUpdateWithWhereUniqueWithoutPlayer1Input;
-  upsert?:
-    | GameUpsertWithWhereUniqueWithoutPlayer1Input[]
-    | GameUpsertWithWhereUniqueWithoutPlayer1Input;
-  deleteMany?: GameScalarWhereInput[] | GameScalarWhereInput;
-  updateMany?:
-    | GameUpdateManyWithWhereNestedInput[]
-    | GameUpdateManyWithWhereNestedInput;
-}
-
-export interface PlayerUpdateWithoutGamesWonDataInput {
-  name?: String;
-  email?: String;
-  gamesStarted?: GameUpdateManyWithoutPlayer1Input;
-  gamesJoined?: GameUpdateManyWithoutPlayer2Input;
+export interface GameSubscriptionWhereInput {
+  mutation_in?: MutationType[] | MutationType;
+  updatedFields_contains?: String;
+  updatedFields_contains_every?: String[] | String;
+  updatedFields_contains_some?: String[] | String;
+  node?: GameWhereInput;
+  AND?: GameSubscriptionWhereInput[] | GameSubscriptionWhereInput;
+  OR?: GameSubscriptionWhereInput[] | GameSubscriptionWhereInput;
+  NOT?: GameSubscriptionWhereInput[] | GameSubscriptionWhereInput;
 }
 
 export interface GameUpdateWithoutWinnerDataInput {
@@ -1054,12 +1157,9 @@ export interface GameUpdateWithoutWinnerDataInput {
   gameInProgress?: Boolean;
 }
 
-export interface GameUpdateManyDataInput {
-  roundsNum?: Int;
-  player1Score?: Int;
-  player2Score?: Int;
-  currentRound?: Int;
-  gameInProgress?: Boolean;
+export interface PlayerUpsertWithoutGamesWonInput {
+  update: PlayerUpdateWithoutGamesWonDataInput;
+  create: PlayerCreateWithoutGamesWonInput;
 }
 
 export interface PlayerCreateInput {
@@ -1069,10 +1169,6 @@ export interface PlayerCreateInput {
   gamesJoined?: GameCreateManyWithoutPlayer2Input;
   gamesWon?: GameCreateManyWithoutWinnerInput;
 }
-
-export type GameWhereUniqueInput = AtLeastOne<{
-  id: ID_Input;
-}>;
 
 export interface NodeNode {
   id: ID_Output;
@@ -1100,6 +1196,302 @@ export interface RoundPreviousValuesSubscription
   player2Score: () => Promise<AsyncIterator<Int>>;
 }
 
+export interface AggregateCardInstance {
+  count: Int;
+}
+
+export interface AggregateCardInstancePromise
+  extends Promise<AggregateCardInstance>,
+    Fragmentable {
+  count: () => Promise<Int>;
+}
+
+export interface AggregateCardInstanceSubscription
+  extends Promise<AsyncIterator<AggregateCardInstance>>,
+    Fragmentable {
+  count: () => Promise<AsyncIterator<Int>>;
+}
+
+export interface CardConnection {
+  pageInfo: PageInfo;
+  edges: CardEdge[];
+}
+
+export interface CardConnectionPromise
+  extends Promise<CardConnection>,
+    Fragmentable {
+  pageInfo: <T = PageInfoPromise>() => T;
+  edges: <T = FragmentableArray<CardEdge>>() => T;
+  aggregate: <T = AggregateCardPromise>() => T;
+}
+
+export interface CardConnectionSubscription
+  extends Promise<AsyncIterator<CardConnection>>,
+    Fragmentable {
+  pageInfo: <T = PageInfoSubscription>() => T;
+  edges: <T = Promise<AsyncIterator<CardEdgeSubscription>>>() => T;
+  aggregate: <T = AggregateCardSubscription>() => T;
+}
+
+export interface CardInstanceEdge {
+  node: CardInstance;
+  cursor: String;
+}
+
+export interface CardInstanceEdgePromise
+  extends Promise<CardInstanceEdge>,
+    Fragmentable {
+  node: <T = CardInstancePromise>() => T;
+  cursor: () => Promise<String>;
+}
+
+export interface CardInstanceEdgeSubscription
+  extends Promise<AsyncIterator<CardInstanceEdge>>,
+    Fragmentable {
+  node: <T = CardInstanceSubscription>() => T;
+  cursor: () => Promise<AsyncIterator<String>>;
+}
+
+export interface PageInfo {
+  hasNextPage: Boolean;
+  hasPreviousPage: Boolean;
+  startCursor?: String;
+  endCursor?: String;
+}
+
+export interface PageInfoPromise extends Promise<PageInfo>, Fragmentable {
+  hasNextPage: () => Promise<Boolean>;
+  hasPreviousPage: () => Promise<Boolean>;
+  startCursor: () => Promise<String>;
+  endCursor: () => Promise<String>;
+}
+
+export interface PageInfoSubscription
+  extends Promise<AsyncIterator<PageInfo>>,
+    Fragmentable {
+  hasNextPage: () => Promise<AsyncIterator<Boolean>>;
+  hasPreviousPage: () => Promise<AsyncIterator<Boolean>>;
+  startCursor: () => Promise<AsyncIterator<String>>;
+  endCursor: () => Promise<AsyncIterator<String>>;
+}
+
+export interface CardInstanceConnection {
+  pageInfo: PageInfo;
+  edges: CardInstanceEdge[];
+}
+
+export interface CardInstanceConnectionPromise
+  extends Promise<CardInstanceConnection>,
+    Fragmentable {
+  pageInfo: <T = PageInfoPromise>() => T;
+  edges: <T = FragmentableArray<CardInstanceEdge>>() => T;
+  aggregate: <T = AggregateCardInstancePromise>() => T;
+}
+
+export interface CardInstanceConnectionSubscription
+  extends Promise<AsyncIterator<CardInstanceConnection>>,
+    Fragmentable {
+  pageInfo: <T = PageInfoSubscription>() => T;
+  edges: <T = Promise<AsyncIterator<CardInstanceEdgeSubscription>>>() => T;
+  aggregate: <T = AggregateCardInstanceSubscription>() => T;
+}
+
+export interface AggregateRound {
+  count: Int;
+}
+
+export interface AggregateRoundPromise
+  extends Promise<AggregateRound>,
+    Fragmentable {
+  count: () => Promise<Int>;
+}
+
+export interface AggregateRoundSubscription
+  extends Promise<AsyncIterator<AggregateRound>>,
+    Fragmentable {
+  count: () => Promise<AsyncIterator<Int>>;
+}
+
+export interface CardInstance {
+  orderIndex?: Int;
+}
+
+export interface CardInstancePromise
+  extends Promise<CardInstance>,
+    Fragmentable {
+  card: <T = CardPromise>() => T;
+  orderIndex: () => Promise<Int>;
+}
+
+export interface CardInstanceSubscription
+  extends Promise<AsyncIterator<CardInstance>>,
+    Fragmentable {
+  card: <T = CardSubscription>() => T;
+  orderIndex: () => Promise<AsyncIterator<Int>>;
+}
+
+export interface RoundConnection {
+  pageInfo: PageInfo;
+  edges: RoundEdge[];
+}
+
+export interface RoundConnectionPromise
+  extends Promise<RoundConnection>,
+    Fragmentable {
+  pageInfo: <T = PageInfoPromise>() => T;
+  edges: <T = FragmentableArray<RoundEdge>>() => T;
+  aggregate: <T = AggregateRoundPromise>() => T;
+}
+
+export interface RoundConnectionSubscription
+  extends Promise<AsyncIterator<RoundConnection>>,
+    Fragmentable {
+  pageInfo: <T = PageInfoSubscription>() => T;
+  edges: <T = Promise<AsyncIterator<RoundEdgeSubscription>>>() => T;
+  aggregate: <T = AggregateRoundSubscription>() => T;
+}
+
+export interface Card {
+  id: ID_Output;
+  createdAt: DateTimeOutput;
+  updatedAt: DateTimeOutput;
+  cardType: CardTypes;
+  expeditionValue?: Int;
+  color: Colors;
+}
+
+export interface CardPromise extends Promise<Card>, Fragmentable {
+  id: () => Promise<ID_Output>;
+  createdAt: () => Promise<DateTimeOutput>;
+  updatedAt: () => Promise<DateTimeOutput>;
+  cardType: () => Promise<CardTypes>;
+  expeditionValue: () => Promise<Int>;
+  color: () => Promise<Colors>;
+}
+
+export interface CardSubscription
+  extends Promise<AsyncIterator<Card>>,
+    Fragmentable {
+  id: () => Promise<AsyncIterator<ID_Output>>;
+  createdAt: () => Promise<AsyncIterator<DateTimeOutput>>;
+  updatedAt: () => Promise<AsyncIterator<DateTimeOutput>>;
+  cardType: () => Promise<AsyncIterator<CardTypes>>;
+  expeditionValue: () => Promise<AsyncIterator<Int>>;
+  color: () => Promise<AsyncIterator<Colors>>;
+}
+
+export interface PlayerEdge {
+  node: Player;
+  cursor: String;
+}
+
+export interface PlayerEdgePromise extends Promise<PlayerEdge>, Fragmentable {
+  node: <T = PlayerPromise>() => T;
+  cursor: () => Promise<String>;
+}
+
+export interface PlayerEdgeSubscription
+  extends Promise<AsyncIterator<PlayerEdge>>,
+    Fragmentable {
+  node: <T = PlayerSubscription>() => T;
+  cursor: () => Promise<AsyncIterator<String>>;
+}
+
+export interface AggregatePlayer {
+  count: Int;
+}
+
+export interface AggregatePlayerPromise
+  extends Promise<AggregatePlayer>,
+    Fragmentable {
+  count: () => Promise<Int>;
+}
+
+export interface AggregatePlayerSubscription
+  extends Promise<AsyncIterator<AggregatePlayer>>,
+    Fragmentable {
+  count: () => Promise<AsyncIterator<Int>>;
+}
+
+export interface CardEdge {
+  node: Card;
+  cursor: String;
+}
+
+export interface CardEdgePromise extends Promise<CardEdge>, Fragmentable {
+  node: <T = CardPromise>() => T;
+  cursor: () => Promise<String>;
+}
+
+export interface CardEdgeSubscription
+  extends Promise<AsyncIterator<CardEdge>>,
+    Fragmentable {
+  node: <T = CardSubscription>() => T;
+  cursor: () => Promise<AsyncIterator<String>>;
+}
+
+export interface PlayerConnection {
+  pageInfo: PageInfo;
+  edges: PlayerEdge[];
+}
+
+export interface PlayerConnectionPromise
+  extends Promise<PlayerConnection>,
+    Fragmentable {
+  pageInfo: <T = PageInfoPromise>() => T;
+  edges: <T = FragmentableArray<PlayerEdge>>() => T;
+  aggregate: <T = AggregatePlayerPromise>() => T;
+}
+
+export interface PlayerConnectionSubscription
+  extends Promise<AsyncIterator<PlayerConnection>>,
+    Fragmentable {
+  pageInfo: <T = PageInfoSubscription>() => T;
+  edges: <T = Promise<AsyncIterator<PlayerEdgeSubscription>>>() => T;
+  aggregate: <T = AggregatePlayerSubscription>() => T;
+}
+
+export interface CardSubscriptionPayload {
+  mutation: MutationType;
+  node: Card;
+  updatedFields: String[];
+  previousValues: CardPreviousValues;
+}
+
+export interface CardSubscriptionPayloadPromise
+  extends Promise<CardSubscriptionPayload>,
+    Fragmentable {
+  mutation: () => Promise<MutationType>;
+  node: <T = CardPromise>() => T;
+  updatedFields: () => Promise<String[]>;
+  previousValues: <T = CardPreviousValuesPromise>() => T;
+}
+
+export interface CardSubscriptionPayloadSubscription
+  extends Promise<AsyncIterator<CardSubscriptionPayload>>,
+    Fragmentable {
+  mutation: () => Promise<AsyncIterator<MutationType>>;
+  node: <T = CardSubscription>() => T;
+  updatedFields: () => Promise<AsyncIterator<String[]>>;
+  previousValues: <T = CardPreviousValuesSubscription>() => T;
+}
+
+export interface AggregateGame {
+  count: Int;
+}
+
+export interface AggregateGamePromise
+  extends Promise<AggregateGame>,
+    Fragmentable {
+  count: () => Promise<Int>;
+}
+
+export interface AggregateGameSubscription
+  extends Promise<AsyncIterator<AggregateGame>>,
+    Fragmentable {
+  count: () => Promise<AsyncIterator<Int>>;
+}
+
 export interface GameConnection {
   pageInfo: PageInfo;
   edges: GameEdge[];
@@ -1119,6 +1511,62 @@ export interface GameConnectionSubscription
   pageInfo: <T = PageInfoSubscription>() => T;
   edges: <T = Promise<AsyncIterator<GameEdgeSubscription>>>() => T;
   aggregate: <T = AggregateGameSubscription>() => T;
+}
+
+export interface CardPreviousValues {
+  id: ID_Output;
+  createdAt: DateTimeOutput;
+  updatedAt: DateTimeOutput;
+  cardType: CardTypes;
+  expeditionValue?: Int;
+  color: Colors;
+}
+
+export interface CardPreviousValuesPromise
+  extends Promise<CardPreviousValues>,
+    Fragmentable {
+  id: () => Promise<ID_Output>;
+  createdAt: () => Promise<DateTimeOutput>;
+  updatedAt: () => Promise<DateTimeOutput>;
+  cardType: () => Promise<CardTypes>;
+  expeditionValue: () => Promise<Int>;
+  color: () => Promise<Colors>;
+}
+
+export interface CardPreviousValuesSubscription
+  extends Promise<AsyncIterator<CardPreviousValues>>,
+    Fragmentable {
+  id: () => Promise<AsyncIterator<ID_Output>>;
+  createdAt: () => Promise<AsyncIterator<DateTimeOutput>>;
+  updatedAt: () => Promise<AsyncIterator<DateTimeOutput>>;
+  cardType: () => Promise<AsyncIterator<CardTypes>>;
+  expeditionValue: () => Promise<AsyncIterator<Int>>;
+  color: () => Promise<AsyncIterator<Colors>>;
+}
+
+export interface RoundSubscriptionPayload {
+  mutation: MutationType;
+  node: Round;
+  updatedFields: String[];
+  previousValues: RoundPreviousValues;
+}
+
+export interface RoundSubscriptionPayloadPromise
+  extends Promise<RoundSubscriptionPayload>,
+    Fragmentable {
+  mutation: () => Promise<MutationType>;
+  node: <T = RoundPromise>() => T;
+  updatedFields: () => Promise<String[]>;
+  previousValues: <T = RoundPreviousValuesPromise>() => T;
+}
+
+export interface RoundSubscriptionPayloadSubscription
+  extends Promise<AsyncIterator<RoundSubscriptionPayload>>,
+    Fragmentable {
+  mutation: () => Promise<AsyncIterator<MutationType>>;
+  node: <T = RoundSubscription>() => T;
+  updatedFields: () => Promise<AsyncIterator<String[]>>;
+  previousValues: <T = RoundPreviousValuesSubscription>() => T;
 }
 
 export interface PlayerSubscriptionPayload {
@@ -1146,6 +1594,221 @@ export interface PlayerSubscriptionPayloadSubscription
   previousValues: <T = PlayerPreviousValuesSubscription>() => T;
 }
 
+export interface Game {
+  id: ID_Output;
+  createdAt: DateTimeOutput;
+  updatedAt: DateTimeOutput;
+  roundsNum: Int;
+  player1Score: Int;
+  player2Score: Int;
+  currentRound: Int;
+  gameInProgress: Boolean;
+}
+
+export interface GamePromise extends Promise<Game>, Fragmentable {
+  id: () => Promise<ID_Output>;
+  createdAt: () => Promise<DateTimeOutput>;
+  updatedAt: () => Promise<DateTimeOutput>;
+  player1: <T = PlayerPromise>() => T;
+  player2: <T = PlayerPromise>() => T;
+  roundsNum: () => Promise<Int>;
+  rounds: <T = FragmentableArray<Round>>(
+    args?: {
+      where?: RoundWhereInput;
+      orderBy?: RoundOrderByInput;
+      skip?: Int;
+      after?: String;
+      before?: String;
+      first?: Int;
+      last?: Int;
+    }
+  ) => T;
+  player1Score: () => Promise<Int>;
+  player2Score: () => Promise<Int>;
+  currentRound: () => Promise<Int>;
+  gameInProgress: () => Promise<Boolean>;
+  Winner: <T = PlayerPromise>() => T;
+}
+
+export interface GameSubscription
+  extends Promise<AsyncIterator<Game>>,
+    Fragmentable {
+  id: () => Promise<AsyncIterator<ID_Output>>;
+  createdAt: () => Promise<AsyncIterator<DateTimeOutput>>;
+  updatedAt: () => Promise<AsyncIterator<DateTimeOutput>>;
+  player1: <T = PlayerSubscription>() => T;
+  player2: <T = PlayerSubscription>() => T;
+  roundsNum: () => Promise<AsyncIterator<Int>>;
+  rounds: <T = Promise<AsyncIterator<RoundSubscription>>>(
+    args?: {
+      where?: RoundWhereInput;
+      orderBy?: RoundOrderByInput;
+      skip?: Int;
+      after?: String;
+      before?: String;
+      first?: Int;
+      last?: Int;
+    }
+  ) => T;
+  player1Score: () => Promise<AsyncIterator<Int>>;
+  player2Score: () => Promise<AsyncIterator<Int>>;
+  currentRound: () => Promise<AsyncIterator<Int>>;
+  gameInProgress: () => Promise<AsyncIterator<Boolean>>;
+  Winner: <T = PlayerSubscription>() => T;
+}
+
+export interface CardInstanceSubscriptionPayload {
+  mutation: MutationType;
+  node: CardInstance;
+  updatedFields: String[];
+  previousValues: CardInstancePreviousValues;
+}
+
+export interface CardInstanceSubscriptionPayloadPromise
+  extends Promise<CardInstanceSubscriptionPayload>,
+    Fragmentable {
+  mutation: () => Promise<MutationType>;
+  node: <T = CardInstancePromise>() => T;
+  updatedFields: () => Promise<String[]>;
+  previousValues: <T = CardInstancePreviousValuesPromise>() => T;
+}
+
+export interface CardInstanceSubscriptionPayloadSubscription
+  extends Promise<AsyncIterator<CardInstanceSubscriptionPayload>>,
+    Fragmentable {
+  mutation: () => Promise<AsyncIterator<MutationType>>;
+  node: <T = CardInstanceSubscription>() => T;
+  updatedFields: () => Promise<AsyncIterator<String[]>>;
+  previousValues: <T = CardInstancePreviousValuesSubscription>() => T;
+}
+
+export interface BatchPayload {
+  count: Long;
+}
+
+export interface BatchPayloadPromise
+  extends Promise<BatchPayload>,
+    Fragmentable {
+  count: () => Promise<Long>;
+}
+
+export interface BatchPayloadSubscription
+  extends Promise<AsyncIterator<BatchPayload>>,
+    Fragmentable {
+  count: () => Promise<AsyncIterator<Long>>;
+}
+
+export interface GameEdge {
+  node: Game;
+  cursor: String;
+}
+
+export interface GameEdgePromise extends Promise<GameEdge>, Fragmentable {
+  node: <T = GamePromise>() => T;
+  cursor: () => Promise<String>;
+}
+
+export interface GameEdgeSubscription
+  extends Promise<AsyncIterator<GameEdge>>,
+    Fragmentable {
+  node: <T = GameSubscription>() => T;
+  cursor: () => Promise<AsyncIterator<String>>;
+}
+
+export interface GamePreviousValues {
+  id: ID_Output;
+  createdAt: DateTimeOutput;
+  updatedAt: DateTimeOutput;
+  roundsNum: Int;
+  player1Score: Int;
+  player2Score: Int;
+  currentRound: Int;
+  gameInProgress: Boolean;
+}
+
+export interface GamePreviousValuesPromise
+  extends Promise<GamePreviousValues>,
+    Fragmentable {
+  id: () => Promise<ID_Output>;
+  createdAt: () => Promise<DateTimeOutput>;
+  updatedAt: () => Promise<DateTimeOutput>;
+  roundsNum: () => Promise<Int>;
+  player1Score: () => Promise<Int>;
+  player2Score: () => Promise<Int>;
+  currentRound: () => Promise<Int>;
+  gameInProgress: () => Promise<Boolean>;
+}
+
+export interface GamePreviousValuesSubscription
+  extends Promise<AsyncIterator<GamePreviousValues>>,
+    Fragmentable {
+  id: () => Promise<AsyncIterator<ID_Output>>;
+  createdAt: () => Promise<AsyncIterator<DateTimeOutput>>;
+  updatedAt: () => Promise<AsyncIterator<DateTimeOutput>>;
+  roundsNum: () => Promise<AsyncIterator<Int>>;
+  player1Score: () => Promise<AsyncIterator<Int>>;
+  player2Score: () => Promise<AsyncIterator<Int>>;
+  currentRound: () => Promise<AsyncIterator<Int>>;
+  gameInProgress: () => Promise<AsyncIterator<Boolean>>;
+}
+
+export interface GameSubscriptionPayload {
+  mutation: MutationType;
+  node: Game;
+  updatedFields: String[];
+  previousValues: GamePreviousValues;
+}
+
+export interface GameSubscriptionPayloadPromise
+  extends Promise<GameSubscriptionPayload>,
+    Fragmentable {
+  mutation: () => Promise<MutationType>;
+  node: <T = GamePromise>() => T;
+  updatedFields: () => Promise<String[]>;
+  previousValues: <T = GamePreviousValuesPromise>() => T;
+}
+
+export interface GameSubscriptionPayloadSubscription
+  extends Promise<AsyncIterator<GameSubscriptionPayload>>,
+    Fragmentable {
+  mutation: () => Promise<AsyncIterator<MutationType>>;
+  node: <T = GameSubscription>() => T;
+  updatedFields: () => Promise<AsyncIterator<String[]>>;
+  previousValues: <T = GamePreviousValuesSubscription>() => T;
+}
+
+export interface AggregateCard {
+  count: Int;
+}
+
+export interface AggregateCardPromise
+  extends Promise<AggregateCard>,
+    Fragmentable {
+  count: () => Promise<Int>;
+}
+
+export interface AggregateCardSubscription
+  extends Promise<AsyncIterator<AggregateCard>>,
+    Fragmentable {
+  count: () => Promise<AsyncIterator<Int>>;
+}
+
+export interface CardInstancePreviousValues {
+  orderIndex?: Int;
+}
+
+export interface CardInstancePreviousValuesPromise
+  extends Promise<CardInstancePreviousValues>,
+    Fragmentable {
+  orderIndex: () => Promise<Int>;
+}
+
+export interface CardInstancePreviousValuesSubscription
+  extends Promise<AsyncIterator<CardInstancePreviousValues>>,
+    Fragmentable {
+  orderIndex: () => Promise<AsyncIterator<Int>>;
+}
+
 export interface Round {
   createdAt: DateTimeOutput;
   player1Score: Int;
@@ -1154,10 +1817,10 @@ export interface Round {
 
 export interface RoundPromise extends Promise<Round>, Fragmentable {
   createdAt: () => Promise<DateTimeOutput>;
-  drawDeck: <T = FragmentableArray<Card>>(
+  drawDeck: <T = FragmentableArray<CardInstance>>(
     args?: {
-      where?: CardWhereInput;
-      orderBy?: CardOrderByInput;
+      where?: CardInstanceWhereInput;
+      orderBy?: CardInstanceOrderByInput;
       skip?: Int;
       after?: String;
       before?: String;
@@ -1211,10 +1874,10 @@ export interface RoundPromise extends Promise<Round>, Fragmentable {
     }
   ) => T;
   player2Score: () => Promise<Int>;
-  discardPile: <T = FragmentableArray<Card>>(
+  discardPile: <T = FragmentableArray<CardInstance>>(
     args?: {
-      where?: CardWhereInput;
-      orderBy?: CardOrderByInput;
+      where?: CardInstanceWhereInput;
+      orderBy?: CardInstanceOrderByInput;
       skip?: Int;
       after?: String;
       before?: String;
@@ -1228,10 +1891,10 @@ export interface RoundSubscription
   extends Promise<AsyncIterator<Round>>,
     Fragmentable {
   createdAt: () => Promise<AsyncIterator<DateTimeOutput>>;
-  drawDeck: <T = Promise<AsyncIterator<CardSubscription>>>(
+  drawDeck: <T = Promise<AsyncIterator<CardInstanceSubscription>>>(
     args?: {
-      where?: CardWhereInput;
-      orderBy?: CardOrderByInput;
+      where?: CardInstanceWhereInput;
+      orderBy?: CardInstanceOrderByInput;
       skip?: Int;
       after?: String;
       before?: String;
@@ -1285,10 +1948,10 @@ export interface RoundSubscription
     }
   ) => T;
   player2Score: () => Promise<AsyncIterator<Int>>;
-  discardPile: <T = Promise<AsyncIterator<CardSubscription>>>(
+  discardPile: <T = Promise<AsyncIterator<CardInstanceSubscription>>>(
     args?: {
-      where?: CardWhereInput;
-      orderBy?: CardOrderByInput;
+      where?: CardInstanceWhereInput;
+      orderBy?: CardInstanceOrderByInput;
       skip?: Int;
       after?: String;
       before?: String;
@@ -1298,25 +1961,21 @@ export interface RoundSubscription
   ) => T;
 }
 
-export interface CardConnection {
-  pageInfo: PageInfo;
-  edges: CardEdge[];
+export interface RoundEdge {
+  node: Round;
+  cursor: String;
 }
 
-export interface CardConnectionPromise
-  extends Promise<CardConnection>,
-    Fragmentable {
-  pageInfo: <T = PageInfoPromise>() => T;
-  edges: <T = FragmentableArray<CardEdge>>() => T;
-  aggregate: <T = AggregateCardPromise>() => T;
+export interface RoundEdgePromise extends Promise<RoundEdge>, Fragmentable {
+  node: <T = RoundPromise>() => T;
+  cursor: () => Promise<String>;
 }
 
-export interface CardConnectionSubscription
-  extends Promise<AsyncIterator<CardConnection>>,
+export interface RoundEdgeSubscription
+  extends Promise<AsyncIterator<RoundEdge>>,
     Fragmentable {
-  pageInfo: <T = PageInfoSubscription>() => T;
-  edges: <T = Promise<AsyncIterator<CardEdgeSubscription>>>() => T;
-  aggregate: <T = AggregateCardSubscription>() => T;
+  node: <T = RoundSubscription>() => T;
+  cursor: () => Promise<AsyncIterator<String>>;
 }
 
 export interface PlayerPreviousValues {
@@ -1345,22 +2004,6 @@ export interface PlayerPreviousValuesSubscription
   updatedAt: () => Promise<AsyncIterator<DateTimeOutput>>;
   name: () => Promise<AsyncIterator<String>>;
   email: () => Promise<AsyncIterator<String>>;
-}
-
-export interface BatchPayload {
-  count: Long;
-}
-
-export interface BatchPayloadPromise
-  extends Promise<BatchPayload>,
-    Fragmentable {
-  count: () => Promise<Long>;
-}
-
-export interface BatchPayloadSubscription
-  extends Promise<AsyncIterator<BatchPayload>>,
-    Fragmentable {
-  count: () => Promise<AsyncIterator<Long>>;
 }
 
 export interface Player {
@@ -1455,448 +2098,6 @@ export interface PlayerSubscription
   ) => T;
 }
 
-export interface RoundEdge {
-  node: Round;
-  cursor: String;
-}
-
-export interface RoundEdgePromise extends Promise<RoundEdge>, Fragmentable {
-  node: <T = RoundPromise>() => T;
-  cursor: () => Promise<String>;
-}
-
-export interface RoundEdgeSubscription
-  extends Promise<AsyncIterator<RoundEdge>>,
-    Fragmentable {
-  node: <T = RoundSubscription>() => T;
-  cursor: () => Promise<AsyncIterator<String>>;
-}
-
-export interface Game {
-  id: ID_Output;
-  createdAt: DateTimeOutput;
-  updatedAt: DateTimeOutput;
-  roundsNum: Int;
-  player1Score: Int;
-  player2Score: Int;
-  currentRound: Int;
-  gameInProgress: Boolean;
-}
-
-export interface GamePromise extends Promise<Game>, Fragmentable {
-  id: () => Promise<ID_Output>;
-  createdAt: () => Promise<DateTimeOutput>;
-  updatedAt: () => Promise<DateTimeOutput>;
-  player1: <T = PlayerPromise>() => T;
-  player2: <T = PlayerPromise>() => T;
-  roundsNum: () => Promise<Int>;
-  rounds: <T = FragmentableArray<Round>>(
-    args?: {
-      where?: RoundWhereInput;
-      orderBy?: RoundOrderByInput;
-      skip?: Int;
-      after?: String;
-      before?: String;
-      first?: Int;
-      last?: Int;
-    }
-  ) => T;
-  player1Score: () => Promise<Int>;
-  player2Score: () => Promise<Int>;
-  currentRound: () => Promise<Int>;
-  gameInProgress: () => Promise<Boolean>;
-  Winner: <T = PlayerPromise>() => T;
-}
-
-export interface GameSubscription
-  extends Promise<AsyncIterator<Game>>,
-    Fragmentable {
-  id: () => Promise<AsyncIterator<ID_Output>>;
-  createdAt: () => Promise<AsyncIterator<DateTimeOutput>>;
-  updatedAt: () => Promise<AsyncIterator<DateTimeOutput>>;
-  player1: <T = PlayerSubscription>() => T;
-  player2: <T = PlayerSubscription>() => T;
-  roundsNum: () => Promise<AsyncIterator<Int>>;
-  rounds: <T = Promise<AsyncIterator<RoundSubscription>>>(
-    args?: {
-      where?: RoundWhereInput;
-      orderBy?: RoundOrderByInput;
-      skip?: Int;
-      after?: String;
-      before?: String;
-      first?: Int;
-      last?: Int;
-    }
-  ) => T;
-  player1Score: () => Promise<AsyncIterator<Int>>;
-  player2Score: () => Promise<AsyncIterator<Int>>;
-  currentRound: () => Promise<AsyncIterator<Int>>;
-  gameInProgress: () => Promise<AsyncIterator<Boolean>>;
-  Winner: <T = PlayerSubscription>() => T;
-}
-
-export interface AggregatePlayer {
-  count: Int;
-}
-
-export interface AggregatePlayerPromise
-  extends Promise<AggregatePlayer>,
-    Fragmentable {
-  count: () => Promise<Int>;
-}
-
-export interface AggregatePlayerSubscription
-  extends Promise<AsyncIterator<AggregatePlayer>>,
-    Fragmentable {
-  count: () => Promise<AsyncIterator<Int>>;
-}
-
-export interface AggregateCard {
-  count: Int;
-}
-
-export interface AggregateCardPromise
-  extends Promise<AggregateCard>,
-    Fragmentable {
-  count: () => Promise<Int>;
-}
-
-export interface AggregateCardSubscription
-  extends Promise<AsyncIterator<AggregateCard>>,
-    Fragmentable {
-  count: () => Promise<AsyncIterator<Int>>;
-}
-
-export interface PlayerConnection {
-  pageInfo: PageInfo;
-  edges: PlayerEdge[];
-}
-
-export interface PlayerConnectionPromise
-  extends Promise<PlayerConnection>,
-    Fragmentable {
-  pageInfo: <T = PageInfoPromise>() => T;
-  edges: <T = FragmentableArray<PlayerEdge>>() => T;
-  aggregate: <T = AggregatePlayerPromise>() => T;
-}
-
-export interface PlayerConnectionSubscription
-  extends Promise<AsyncIterator<PlayerConnection>>,
-    Fragmentable {
-  pageInfo: <T = PageInfoSubscription>() => T;
-  edges: <T = Promise<AsyncIterator<PlayerEdgeSubscription>>>() => T;
-  aggregate: <T = AggregatePlayerSubscription>() => T;
-}
-
-export interface Card {
-  id: ID_Output;
-  createdAt: DateTimeOutput;
-  updatedAt: DateTimeOutput;
-  cardType: CardTypes;
-  expeditionValue?: Int;
-  color: Colors;
-}
-
-export interface CardPromise extends Promise<Card>, Fragmentable {
-  id: () => Promise<ID_Output>;
-  createdAt: () => Promise<DateTimeOutput>;
-  updatedAt: () => Promise<DateTimeOutput>;
-  cardType: () => Promise<CardTypes>;
-  expeditionValue: () => Promise<Int>;
-  color: () => Promise<Colors>;
-}
-
-export interface CardSubscription
-  extends Promise<AsyncIterator<Card>>,
-    Fragmentable {
-  id: () => Promise<AsyncIterator<ID_Output>>;
-  createdAt: () => Promise<AsyncIterator<DateTimeOutput>>;
-  updatedAt: () => Promise<AsyncIterator<DateTimeOutput>>;
-  cardType: () => Promise<AsyncIterator<CardTypes>>;
-  expeditionValue: () => Promise<AsyncIterator<Int>>;
-  color: () => Promise<AsyncIterator<Colors>>;
-}
-
-export interface AggregateGame {
-  count: Int;
-}
-
-export interface AggregateGamePromise
-  extends Promise<AggregateGame>,
-    Fragmentable {
-  count: () => Promise<Int>;
-}
-
-export interface AggregateGameSubscription
-  extends Promise<AsyncIterator<AggregateGame>>,
-    Fragmentable {
-  count: () => Promise<AsyncIterator<Int>>;
-}
-
-export interface CardSubscriptionPayload {
-  mutation: MutationType;
-  node: Card;
-  updatedFields: String[];
-  previousValues: CardPreviousValues;
-}
-
-export interface CardSubscriptionPayloadPromise
-  extends Promise<CardSubscriptionPayload>,
-    Fragmentable {
-  mutation: () => Promise<MutationType>;
-  node: <T = CardPromise>() => T;
-  updatedFields: () => Promise<String[]>;
-  previousValues: <T = CardPreviousValuesPromise>() => T;
-}
-
-export interface CardSubscriptionPayloadSubscription
-  extends Promise<AsyncIterator<CardSubscriptionPayload>>,
-    Fragmentable {
-  mutation: () => Promise<AsyncIterator<MutationType>>;
-  node: <T = CardSubscription>() => T;
-  updatedFields: () => Promise<AsyncIterator<String[]>>;
-  previousValues: <T = CardPreviousValuesSubscription>() => T;
-}
-
-export interface RoundSubscriptionPayload {
-  mutation: MutationType;
-  node: Round;
-  updatedFields: String[];
-  previousValues: RoundPreviousValues;
-}
-
-export interface RoundSubscriptionPayloadPromise
-  extends Promise<RoundSubscriptionPayload>,
-    Fragmentable {
-  mutation: () => Promise<MutationType>;
-  node: <T = RoundPromise>() => T;
-  updatedFields: () => Promise<String[]>;
-  previousValues: <T = RoundPreviousValuesPromise>() => T;
-}
-
-export interface RoundSubscriptionPayloadSubscription
-  extends Promise<AsyncIterator<RoundSubscriptionPayload>>,
-    Fragmentable {
-  mutation: () => Promise<AsyncIterator<MutationType>>;
-  node: <T = RoundSubscription>() => T;
-  updatedFields: () => Promise<AsyncIterator<String[]>>;
-  previousValues: <T = RoundPreviousValuesSubscription>() => T;
-}
-
-export interface RoundConnection {
-  pageInfo: PageInfo;
-  edges: RoundEdge[];
-}
-
-export interface RoundConnectionPromise
-  extends Promise<RoundConnection>,
-    Fragmentable {
-  pageInfo: <T = PageInfoPromise>() => T;
-  edges: <T = FragmentableArray<RoundEdge>>() => T;
-  aggregate: <T = AggregateRoundPromise>() => T;
-}
-
-export interface RoundConnectionSubscription
-  extends Promise<AsyncIterator<RoundConnection>>,
-    Fragmentable {
-  pageInfo: <T = PageInfoSubscription>() => T;
-  edges: <T = Promise<AsyncIterator<RoundEdgeSubscription>>>() => T;
-  aggregate: <T = AggregateRoundSubscription>() => T;
-}
-
-export interface GamePreviousValues {
-  id: ID_Output;
-  createdAt: DateTimeOutput;
-  updatedAt: DateTimeOutput;
-  roundsNum: Int;
-  player1Score: Int;
-  player2Score: Int;
-  currentRound: Int;
-  gameInProgress: Boolean;
-}
-
-export interface GamePreviousValuesPromise
-  extends Promise<GamePreviousValues>,
-    Fragmentable {
-  id: () => Promise<ID_Output>;
-  createdAt: () => Promise<DateTimeOutput>;
-  updatedAt: () => Promise<DateTimeOutput>;
-  roundsNum: () => Promise<Int>;
-  player1Score: () => Promise<Int>;
-  player2Score: () => Promise<Int>;
-  currentRound: () => Promise<Int>;
-  gameInProgress: () => Promise<Boolean>;
-}
-
-export interface GamePreviousValuesSubscription
-  extends Promise<AsyncIterator<GamePreviousValues>>,
-    Fragmentable {
-  id: () => Promise<AsyncIterator<ID_Output>>;
-  createdAt: () => Promise<AsyncIterator<DateTimeOutput>>;
-  updatedAt: () => Promise<AsyncIterator<DateTimeOutput>>;
-  roundsNum: () => Promise<AsyncIterator<Int>>;
-  player1Score: () => Promise<AsyncIterator<Int>>;
-  player2Score: () => Promise<AsyncIterator<Int>>;
-  currentRound: () => Promise<AsyncIterator<Int>>;
-  gameInProgress: () => Promise<AsyncIterator<Boolean>>;
-}
-
-export interface GameSubscriptionPayload {
-  mutation: MutationType;
-  node: Game;
-  updatedFields: String[];
-  previousValues: GamePreviousValues;
-}
-
-export interface GameSubscriptionPayloadPromise
-  extends Promise<GameSubscriptionPayload>,
-    Fragmentable {
-  mutation: () => Promise<MutationType>;
-  node: <T = GamePromise>() => T;
-  updatedFields: () => Promise<String[]>;
-  previousValues: <T = GamePreviousValuesPromise>() => T;
-}
-
-export interface GameSubscriptionPayloadSubscription
-  extends Promise<AsyncIterator<GameSubscriptionPayload>>,
-    Fragmentable {
-  mutation: () => Promise<AsyncIterator<MutationType>>;
-  node: <T = GameSubscription>() => T;
-  updatedFields: () => Promise<AsyncIterator<String[]>>;
-  previousValues: <T = GamePreviousValuesSubscription>() => T;
-}
-
-export interface CardEdge {
-  node: Card;
-  cursor: String;
-}
-
-export interface CardEdgePromise extends Promise<CardEdge>, Fragmentable {
-  node: <T = CardPromise>() => T;
-  cursor: () => Promise<String>;
-}
-
-export interface CardEdgeSubscription
-  extends Promise<AsyncIterator<CardEdge>>,
-    Fragmentable {
-  node: <T = CardSubscription>() => T;
-  cursor: () => Promise<AsyncIterator<String>>;
-}
-
-export interface CardPreviousValues {
-  id: ID_Output;
-  createdAt: DateTimeOutput;
-  updatedAt: DateTimeOutput;
-  cardType: CardTypes;
-  expeditionValue?: Int;
-  color: Colors;
-}
-
-export interface CardPreviousValuesPromise
-  extends Promise<CardPreviousValues>,
-    Fragmentable {
-  id: () => Promise<ID_Output>;
-  createdAt: () => Promise<DateTimeOutput>;
-  updatedAt: () => Promise<DateTimeOutput>;
-  cardType: () => Promise<CardTypes>;
-  expeditionValue: () => Promise<Int>;
-  color: () => Promise<Colors>;
-}
-
-export interface CardPreviousValuesSubscription
-  extends Promise<AsyncIterator<CardPreviousValues>>,
-    Fragmentable {
-  id: () => Promise<AsyncIterator<ID_Output>>;
-  createdAt: () => Promise<AsyncIterator<DateTimeOutput>>;
-  updatedAt: () => Promise<AsyncIterator<DateTimeOutput>>;
-  cardType: () => Promise<AsyncIterator<CardTypes>>;
-  expeditionValue: () => Promise<AsyncIterator<Int>>;
-  color: () => Promise<AsyncIterator<Colors>>;
-}
-
-export interface PlayerEdge {
-  node: Player;
-  cursor: String;
-}
-
-export interface PlayerEdgePromise extends Promise<PlayerEdge>, Fragmentable {
-  node: <T = PlayerPromise>() => T;
-  cursor: () => Promise<String>;
-}
-
-export interface PlayerEdgeSubscription
-  extends Promise<AsyncIterator<PlayerEdge>>,
-    Fragmentable {
-  node: <T = PlayerSubscription>() => T;
-  cursor: () => Promise<AsyncIterator<String>>;
-}
-
-export interface AggregateRound {
-  count: Int;
-}
-
-export interface AggregateRoundPromise
-  extends Promise<AggregateRound>,
-    Fragmentable {
-  count: () => Promise<Int>;
-}
-
-export interface AggregateRoundSubscription
-  extends Promise<AsyncIterator<AggregateRound>>,
-    Fragmentable {
-  count: () => Promise<AsyncIterator<Int>>;
-}
-
-export interface GameEdge {
-  node: Game;
-  cursor: String;
-}
-
-export interface GameEdgePromise extends Promise<GameEdge>, Fragmentable {
-  node: <T = GamePromise>() => T;
-  cursor: () => Promise<String>;
-}
-
-export interface GameEdgeSubscription
-  extends Promise<AsyncIterator<GameEdge>>,
-    Fragmentable {
-  node: <T = GameSubscription>() => T;
-  cursor: () => Promise<AsyncIterator<String>>;
-}
-
-export interface PageInfo {
-  hasNextPage: Boolean;
-  hasPreviousPage: Boolean;
-  startCursor?: String;
-  endCursor?: String;
-}
-
-export interface PageInfoPromise extends Promise<PageInfo>, Fragmentable {
-  hasNextPage: () => Promise<Boolean>;
-  hasPreviousPage: () => Promise<Boolean>;
-  startCursor: () => Promise<String>;
-  endCursor: () => Promise<String>;
-}
-
-export interface PageInfoSubscription
-  extends Promise<AsyncIterator<PageInfo>>,
-    Fragmentable {
-  hasNextPage: () => Promise<AsyncIterator<Boolean>>;
-  hasPreviousPage: () => Promise<AsyncIterator<Boolean>>;
-  startCursor: () => Promise<AsyncIterator<String>>;
-  endCursor: () => Promise<AsyncIterator<String>>;
-}
-
-/*
-The `Int` scalar type represents non-fractional signed whole numeric values. Int can represent values between -(2^31) and 2^31 - 1. 
-*/
-export type Int = number;
-
-/*
-The `String` scalar type represents textual data, represented as UTF-8 character sequences. The String type is most often used by GraphQL to represent free-form human-readable text.
-*/
-export type String = string;
-
 export type Long = string;
 
 /*
@@ -1910,15 +2111,25 @@ DateTime scalar output type, which is always a string
 export type DateTimeOutput = string;
 
 /*
+The `Int` scalar type represents non-fractional signed whole numeric values. Int can represent values between -(2^31) and 2^31 - 1. 
+*/
+export type Int = number;
+
+/*
+The `Boolean` scalar type represents `true` or `false`.
+*/
+export type Boolean = boolean;
+
+/*
 The `ID` scalar type represents a unique identifier, often used to refetch an object or as key for a cache. The ID type appears in a JSON response as a String; however, it is not intended to be human-readable. When expected as an input type, any string (such as `"4"`) or integer (such as `4`) input value will be accepted as an ID.
 */
 export type ID_Input = string | number;
 export type ID_Output = string;
 
 /*
-The `Boolean` scalar type represents `true` or `false`.
+The `String` scalar type represents textual data, represented as UTF-8 character sequences. The String type is most often used by GraphQL to represent free-form human-readable text.
 */
-export type Boolean = boolean;
+export type String = string;
 
 /**
  * Model Metadata
@@ -1927,6 +2138,10 @@ export type Boolean = boolean;
 export const models: Model[] = [
   {
     name: "Card",
+    embedded: false
+  },
+  {
+    name: "CardInstance",
     embedded: false
   },
   {
