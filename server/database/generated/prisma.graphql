@@ -1,5 +1,4 @@
-module.exports = {
-        typeDefs: /* GraphQL */ `type AggregateCard {
+type AggregateCard {
   count: Int!
 }
 
@@ -1083,6 +1082,3 @@ type Subscription {
   player(where: PlayerSubscriptionWhereInput): PlayerSubscriptionPayload
   round(where: RoundSubscriptionWhereInput): RoundSubscriptionPayload
 }
-`
-      }
-    

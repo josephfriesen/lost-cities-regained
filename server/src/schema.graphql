@@ -1,9 +1,1 @@
-type User {
-  id: ID!
-  name: String!
-  email: String
-}
-
-type Query {
-  info: String!
-}
+# import Player, Game, Round, Card, Query from "./generated/prisma.graphql"

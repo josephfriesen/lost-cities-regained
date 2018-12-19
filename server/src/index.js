@@ -1,16 +1,23 @@
 const { GraphQLServer } = require('graphql-yoga');
-const { prisma } = require('./generated/prisma-client');
+const { Prisma } = require('prisma-binding');
+const Query = require('./resolvers/Query');
 
 const resolvers = {
-  Query: {
-    info: () => 'Info.'
-  }
+  Query
 }
 
 const server = new GraphQLServer({
   typeDefs: './src/schema.graphql',
   resolvers,
-  context: { prisma }
+  context: req => ({
+    ...req,
+    db: new Prisma({
+      typeDefs: 'src/generated/prisma.graphql',
+      endpoint: 'https://us1.prisma.sh/lost-cities-regained/lost-cities/dev',
+      secret: 'shhhitsasecret8888',
+      debug: true
+    })
+  })
 });
 
-server.start(() => console.log('Server is running on http://localhost:4000'));
+server.start(() => console.log('Server is running on http://localhost:4000, babyyyyyyy'));
