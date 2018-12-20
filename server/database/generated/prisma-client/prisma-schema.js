@@ -99,6 +99,20 @@ type CardInstancePreviousValues {
   orderIndex: Int
 }
 
+input CardInstanceScalarWhereInput {
+  orderIndex: Int
+  orderIndex_not: Int
+  orderIndex_in: [Int!]
+  orderIndex_not_in: [Int!]
+  orderIndex_lt: Int
+  orderIndex_lte: Int
+  orderIndex_gt: Int
+  orderIndex_gte: Int
+  AND: [CardInstanceScalarWhereInput!]
+  OR: [CardInstanceScalarWhereInput!]
+  NOT: [CardInstanceScalarWhereInput!]
+}
+
 type CardInstanceSubscriptionPayload {
   mutation: MutationType!
   node: CardInstance
@@ -117,8 +131,23 @@ input CardInstanceSubscriptionWhereInput {
   NOT: [CardInstanceSubscriptionWhereInput!]
 }
 
+input CardInstanceUpdateManyDataInput {
+  orderIndex: Int
+}
+
+input CardInstanceUpdateManyInput {
+  create: [CardInstanceCreateInput!]
+  deleteMany: [CardInstanceScalarWhereInput!]
+  updateMany: [CardInstanceUpdateManyWithWhereNestedInput!]
+}
+
 input CardInstanceUpdateManyMutationInput {
   orderIndex: Int
+}
+
+input CardInstanceUpdateManyWithWhereNestedInput {
+  where: CardInstanceScalarWhereInput!
+  data: CardInstanceUpdateManyDataInput!
 }
 
 input CardInstanceWhereInput {
@@ -160,6 +189,58 @@ type CardPreviousValues {
   color: Colors!
 }
 
+input CardScalarWhereInput {
+  id: ID
+  id_not: ID
+  id_in: [ID!]
+  id_not_in: [ID!]
+  id_lt: ID
+  id_lte: ID
+  id_gt: ID
+  id_gte: ID
+  id_contains: ID
+  id_not_contains: ID
+  id_starts_with: ID
+  id_not_starts_with: ID
+  id_ends_with: ID
+  id_not_ends_with: ID
+  createdAt: DateTime
+  createdAt_not: DateTime
+  createdAt_in: [DateTime!]
+  createdAt_not_in: [DateTime!]
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  updatedAt: DateTime
+  updatedAt_not: DateTime
+  updatedAt_in: [DateTime!]
+  updatedAt_not_in: [DateTime!]
+  updatedAt_lt: DateTime
+  updatedAt_lte: DateTime
+  updatedAt_gt: DateTime
+  updatedAt_gte: DateTime
+  cardType: CardTypes
+  cardType_not: CardTypes
+  cardType_in: [CardTypes!]
+  cardType_not_in: [CardTypes!]
+  expeditionValue: Int
+  expeditionValue_not: Int
+  expeditionValue_in: [Int!]
+  expeditionValue_not_in: [Int!]
+  expeditionValue_lt: Int
+  expeditionValue_lte: Int
+  expeditionValue_gt: Int
+  expeditionValue_gte: Int
+  color: Colors
+  color_not: Colors
+  color_in: [Colors!]
+  color_not_in: [Colors!]
+  AND: [CardScalarWhereInput!]
+  OR: [CardScalarWhereInput!]
+  NOT: [CardScalarWhereInput!]
+}
+
 type CardSubscriptionPayload {
   mutation: MutationType!
   node: Card
@@ -183,16 +264,55 @@ enum CardTypes {
   EXPEDITION
 }
 
+input CardUpdateDataInput {
+  cardType: CardTypes
+  expeditionValue: Int
+  color: Colors
+}
+
 input CardUpdateInput {
   cardType: CardTypes
   expeditionValue: Int
   color: Colors
 }
 
+input CardUpdateManyDataInput {
+  cardType: CardTypes
+  expeditionValue: Int
+  color: Colors
+}
+
+input CardUpdateManyInput {
+  create: [CardCreateInput!]
+  update: [CardUpdateWithWhereUniqueNestedInput!]
+  upsert: [CardUpsertWithWhereUniqueNestedInput!]
+  delete: [CardWhereUniqueInput!]
+  connect: [CardWhereUniqueInput!]
+  disconnect: [CardWhereUniqueInput!]
+  deleteMany: [CardScalarWhereInput!]
+  updateMany: [CardUpdateManyWithWhereNestedInput!]
+}
+
 input CardUpdateManyMutationInput {
   cardType: CardTypes
   expeditionValue: Int
   color: Colors
+}
+
+input CardUpdateManyWithWhereNestedInput {
+  where: CardScalarWhereInput!
+  data: CardUpdateManyDataInput!
+}
+
+input CardUpdateWithWhereUniqueNestedInput {
+  where: CardWhereUniqueInput!
+  data: CardUpdateDataInput!
+}
+
+input CardUpsertWithWhereUniqueNestedInput {
+  where: CardWhereUniqueInput!
+  update: CardUpdateDataInput!
+  create: CardCreateInput!
 }
 
 input CardWhereInput {
@@ -702,7 +822,10 @@ type Mutation {
   deletePlayer(where: PlayerWhereUniqueInput!): Player
   deleteManyPlayers(where: PlayerWhereInput): BatchPayload!
   createRound(data: RoundCreateInput!): Round!
+  updateRound(data: RoundUpdateInput!, where: RoundWhereUniqueInput!): Round
   updateManyRounds(data: RoundUpdateManyMutationInput!, where: RoundWhereInput): BatchPayload!
+  upsertRound(where: RoundWhereUniqueInput!, create: RoundCreateInput!, update: RoundUpdateInput!): Round!
+  deleteRound(where: RoundWhereUniqueInput!): Round
   deleteManyRounds(where: RoundWhereInput): BatchPayload!
 }
 
@@ -989,12 +1112,14 @@ type Query {
   player(where: PlayerWhereUniqueInput!): Player
   players(where: PlayerWhereInput, orderBy: PlayerOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Player]!
   playersConnection(where: PlayerWhereInput, orderBy: PlayerOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): PlayerConnection!
+  round(where: RoundWhereUniqueInput!): Round
   rounds(where: RoundWhereInput, orderBy: RoundOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Round]!
   roundsConnection(where: RoundWhereInput, orderBy: RoundOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): RoundConnection!
   node(id: ID!): Node
 }
 
 type Round {
+  id: ID!
   createdAt: DateTime!
   drawDeck(where: CardInstanceWhereInput, orderBy: CardInstanceOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [CardInstance!]
   player1Hand(where: CardWhereInput, orderBy: CardOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Card!]
@@ -1025,6 +1150,7 @@ input RoundCreateInput {
 
 input RoundCreateManyInput {
   create: [RoundCreateInput!]
+  connect: [RoundWhereUniqueInput!]
 }
 
 type RoundEdge {
@@ -1033,25 +1159,40 @@ type RoundEdge {
 }
 
 enum RoundOrderByInput {
+  id_ASC
+  id_DESC
   createdAt_ASC
   createdAt_DESC
   player1Score_ASC
   player1Score_DESC
   player2Score_ASC
   player2Score_DESC
-  id_ASC
-  id_DESC
   updatedAt_ASC
   updatedAt_DESC
 }
 
 type RoundPreviousValues {
+  id: ID!
   createdAt: DateTime!
   player1Score: Int!
   player2Score: Int!
 }
 
 input RoundScalarWhereInput {
+  id: ID
+  id_not: ID
+  id_in: [ID!]
+  id_not_in: [ID!]
+  id_lt: ID
+  id_lte: ID
+  id_gt: ID
+  id_gte: ID
+  id_contains: ID
+  id_not_contains: ID
+  id_starts_with: ID
+  id_not_starts_with: ID
+  id_ends_with: ID
+  id_not_ends_with: ID
   createdAt: DateTime
   createdAt_not: DateTime
   createdAt_in: [DateTime!]
@@ -1099,6 +1240,28 @@ input RoundSubscriptionWhereInput {
   NOT: [RoundSubscriptionWhereInput!]
 }
 
+input RoundUpdateDataInput {
+  drawDeck: CardInstanceUpdateManyInput
+  player1Hand: CardUpdateManyInput
+  player1Tableau: CardUpdateManyInput
+  player1Score: Int
+  player2Hand: CardUpdateManyInput
+  player2Tableau: CardUpdateManyInput
+  player2Score: Int
+  discardPile: CardInstanceUpdateManyInput
+}
+
+input RoundUpdateInput {
+  drawDeck: CardInstanceUpdateManyInput
+  player1Hand: CardUpdateManyInput
+  player1Tableau: CardUpdateManyInput
+  player1Score: Int
+  player2Hand: CardUpdateManyInput
+  player2Tableau: CardUpdateManyInput
+  player2Score: Int
+  discardPile: CardInstanceUpdateManyInput
+}
+
 input RoundUpdateManyDataInput {
   player1Score: Int
   player2Score: Int
@@ -1106,6 +1269,11 @@ input RoundUpdateManyDataInput {
 
 input RoundUpdateManyInput {
   create: [RoundCreateInput!]
+  update: [RoundUpdateWithWhereUniqueNestedInput!]
+  upsert: [RoundUpsertWithWhereUniqueNestedInput!]
+  delete: [RoundWhereUniqueInput!]
+  connect: [RoundWhereUniqueInput!]
+  disconnect: [RoundWhereUniqueInput!]
   deleteMany: [RoundScalarWhereInput!]
   updateMany: [RoundUpdateManyWithWhereNestedInput!]
 }
@@ -1120,7 +1288,32 @@ input RoundUpdateManyWithWhereNestedInput {
   data: RoundUpdateManyDataInput!
 }
 
+input RoundUpdateWithWhereUniqueNestedInput {
+  where: RoundWhereUniqueInput!
+  data: RoundUpdateDataInput!
+}
+
+input RoundUpsertWithWhereUniqueNestedInput {
+  where: RoundWhereUniqueInput!
+  update: RoundUpdateDataInput!
+  create: RoundCreateInput!
+}
+
 input RoundWhereInput {
+  id: ID
+  id_not: ID
+  id_in: [ID!]
+  id_not_in: [ID!]
+  id_lt: ID
+  id_lte: ID
+  id_gt: ID
+  id_gte: ID
+  id_contains: ID
+  id_not_contains: ID
+  id_starts_with: ID
+  id_not_starts_with: ID
+  id_ends_with: ID
+  id_not_ends_with: ID
   createdAt: DateTime
   createdAt_not: DateTime
   createdAt_in: [DateTime!]
@@ -1166,6 +1359,10 @@ input RoundWhereInput {
   AND: [RoundWhereInput!]
   OR: [RoundWhereInput!]
   NOT: [RoundWhereInput!]
+}
+
+input RoundWhereUniqueInput {
+  id: ID
 }
 
 type Subscription {

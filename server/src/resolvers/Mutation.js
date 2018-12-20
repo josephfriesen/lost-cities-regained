@@ -12,7 +12,6 @@ async function newRound(parent, args, context, info) {
   const deck = await constructRandomizedDeckInstances(parent, args, context, info);
   const player1Hand = getCardIdsFromConstructedInstances(dealCards(deck, 8));
   const player2Hand = getCardIdsFromConstructedInstances(dealCards(deck, 8));
-  console.log("Player1 Hand: ", player1Hand);
   const discardPile = [];
   const roundCreateInput = {
     data: {
@@ -24,14 +23,18 @@ async function newRound(parent, args, context, info) {
       player1Score: 0,
       player2Score: 0
     }
-  }
+  };
   return context.db.mutation.createRound(roundCreateInput, info);
 }
 
 async function newGame(parent, args, context, info) {
-  const deck = await shuffleDeck(parent, args, context, info);
-  console.log("this is the shuffled deck: ", deck);
-  return null;
+  // let roundids = [];
+  // for (let i = 1; i <= 3; i++) {
+  //   const round = await newRound(parent, args, context, `{id}`);
+  //   roundids.push({ id: round.id });
+  // }
+  // console.log("Your round ids are: ", roundids);
+  // return null;
 }
 
 module.exports = {

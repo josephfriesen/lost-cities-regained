@@ -131,6 +131,7 @@ export interface Prisma {
       last?: Int;
     }
   ) => PlayerConnectionPromise;
+  round: (where: RoundWhereUniqueInput) => RoundPromise;
   rounds: (
     args?: {
       where?: RoundWhereInput;
@@ -218,9 +219,20 @@ export interface Prisma {
   deletePlayer: (where: PlayerWhereUniqueInput) => PlayerPromise;
   deleteManyPlayers: (where?: PlayerWhereInput) => BatchPayloadPromise;
   createRound: (data: RoundCreateInput) => RoundPromise;
+  updateRound: (
+    args: { data: RoundUpdateInput; where: RoundWhereUniqueInput }
+  ) => RoundPromise;
   updateManyRounds: (
     args: { data: RoundUpdateManyMutationInput; where?: RoundWhereInput }
   ) => BatchPayloadPromise;
+  upsertRound: (
+    args: {
+      where: RoundWhereUniqueInput;
+      create: RoundCreateInput;
+      update: RoundUpdateInput;
+    }
+  ) => RoundPromise;
+  deleteRound: (where: RoundWhereUniqueInput) => RoundPromise;
   deleteManyRounds: (where?: RoundWhereInput) => BatchPayloadPromise;
 
   /**
@@ -301,14 +313,14 @@ export type GameOrderByInput =
 export type Colors = "RED" | "GREEN" | "WHITE" | "BLUE" | "YELLOW";
 
 export type RoundOrderByInput =
+  | "id_ASC"
+  | "id_DESC"
   | "createdAt_ASC"
   | "createdAt_DESC"
   | "player1Score_ASC"
   | "player1Score_DESC"
   | "player2Score_ASC"
   | "player2Score_DESC"
-  | "id_ASC"
-  | "id_DESC"
   | "updatedAt_ASC"
   | "updatedAt_DESC";
 
@@ -328,54 +340,58 @@ export type PlayerOrderByInput =
 
 export type MutationType = "CREATED" | "UPDATED" | "DELETED";
 
-export interface CardCreateManyInput {
-  create?: CardCreateInput[] | CardCreateInput;
-  connect?: CardWhereUniqueInput[] | CardWhereUniqueInput;
+export interface GameCreateManyWithoutWinnerInput {
+  create?: GameCreateWithoutWinnerInput[] | GameCreateWithoutWinnerInput;
+  connect?: GameWhereUniqueInput[] | GameWhereUniqueInput;
 }
 
 export type CardWhereUniqueInput = AtLeastOne<{
   id: ID_Input;
 }>;
 
-export interface PlayerUpdateWithoutGamesJoinedDataInput {
-  name?: String;
+export interface PlayerCreateWithoutGamesStartedInput {
+  name: String;
   email?: String;
-  gamesStarted?: GameUpdateManyWithoutPlayer1Input;
-  gamesWon?: GameUpdateManyWithoutWinnerInput;
+  gamesJoined?: GameCreateManyWithoutPlayer2Input;
+  gamesWon?: GameCreateManyWithoutWinnerInput;
 }
 
-export interface GameUpdateManyWithoutPlayer1Input {
-  create?: GameCreateWithoutPlayer1Input[] | GameCreateWithoutPlayer1Input;
+export interface GameUpdateWithWhereUniqueWithoutPlayer1Input {
+  where: GameWhereUniqueInput;
+  data: GameUpdateWithoutPlayer1DataInput;
+}
+
+export interface GameCreateManyWithoutPlayer2Input {
+  create?: GameCreateWithoutPlayer2Input[] | GameCreateWithoutPlayer2Input;
+  connect?: GameWhereUniqueInput[] | GameWhereUniqueInput;
+}
+
+export interface GameUpdateManyWithoutPlayer2Input {
+  create?: GameCreateWithoutPlayer2Input[] | GameCreateWithoutPlayer2Input;
   delete?: GameWhereUniqueInput[] | GameWhereUniqueInput;
   connect?: GameWhereUniqueInput[] | GameWhereUniqueInput;
   disconnect?: GameWhereUniqueInput[] | GameWhereUniqueInput;
   update?:
-    | GameUpdateWithWhereUniqueWithoutPlayer1Input[]
-    | GameUpdateWithWhereUniqueWithoutPlayer1Input;
+    | GameUpdateWithWhereUniqueWithoutPlayer2Input[]
+    | GameUpdateWithWhereUniqueWithoutPlayer2Input;
   upsert?:
-    | GameUpsertWithWhereUniqueWithoutPlayer1Input[]
-    | GameUpsertWithWhereUniqueWithoutPlayer1Input;
+    | GameUpsertWithWhereUniqueWithoutPlayer2Input[]
+    | GameUpsertWithWhereUniqueWithoutPlayer2Input;
   deleteMany?: GameScalarWhereInput[] | GameScalarWhereInput;
   updateMany?:
     | GameUpdateManyWithWhereNestedInput[]
     | GameUpdateManyWithWhereNestedInput;
 }
 
-export interface PlayerUpdateOneRequiredWithoutGamesJoinedInput {
-  create?: PlayerCreateWithoutGamesJoinedInput;
-  update?: PlayerUpdateWithoutGamesJoinedDataInput;
-  upsert?: PlayerUpsertWithoutGamesJoinedInput;
-  connect?: PlayerWhereUniqueInput;
-}
-
-export interface PlayerCreateOneWithoutGamesJoinedInput {
-  create?: PlayerCreateWithoutGamesJoinedInput;
-  connect?: PlayerWhereUniqueInput;
-}
-
-export interface CardInstanceCreateInput {
-  card: CardCreateOneInput;
-  orderIndex?: Int;
+export interface GameCreateWithoutPlayer2Input {
+  player1: PlayerCreateOneWithoutGamesStartedInput;
+  roundsNum?: Int;
+  rounds?: RoundCreateManyInput;
+  player1Score?: Int;
+  player2Score?: Int;
+  currentRound: Int;
+  gameInProgress?: Boolean;
+  Winner?: PlayerCreateOneWithoutGamesWonInput;
 }
 
 export interface PlayerSubscriptionWhereInput {
@@ -389,9 +405,9 @@ export interface PlayerSubscriptionWhereInput {
   NOT?: PlayerSubscriptionWhereInput[] | PlayerSubscriptionWhereInput;
 }
 
-export interface CardCreateOneInput {
-  create?: CardCreateInput;
-  connect?: CardWhereUniqueInput;
+export interface RoundCreateManyInput {
+  create?: RoundCreateInput[] | RoundCreateInput;
+  connect?: RoundWhereUniqueInput[] | RoundWhereUniqueInput;
 }
 
 export interface CardInstanceWhereInput {
@@ -409,8 +425,15 @@ export interface CardInstanceWhereInput {
   NOT?: CardInstanceWhereInput[] | CardInstanceWhereInput;
 }
 
-export interface CardInstanceUpdateManyMutationInput {
-  orderIndex?: Int;
+export interface RoundCreateInput {
+  drawDeck?: CardInstanceCreateManyInput;
+  player1Hand?: CardCreateManyInput;
+  player1Tableau?: CardCreateManyInput;
+  player1Score: Int;
+  player2Hand?: CardCreateManyInput;
+  player2Tableau?: CardCreateManyInput;
+  player2Score: Int;
+  discardPile?: CardInstanceCreateManyInput;
 }
 
 export interface CardSubscriptionWhereInput {
@@ -424,50 +447,48 @@ export interface CardSubscriptionWhereInput {
   NOT?: CardSubscriptionWhereInput[] | CardSubscriptionWhereInput;
 }
 
-export interface GameCreateInput {
-  player1: PlayerCreateOneWithoutGamesStartedInput;
-  player2: PlayerCreateOneWithoutGamesJoinedInput;
-  roundsNum?: Int;
-  rounds?: RoundCreateManyInput;
+export interface CardInstanceCreateManyInput {
+  create?: CardInstanceCreateInput[] | CardInstanceCreateInput;
+}
+
+export interface RoundUpdateInput {
+  drawDeck?: CardInstanceUpdateManyInput;
+  player1Hand?: CardUpdateManyInput;
+  player1Tableau?: CardUpdateManyInput;
   player1Score?: Int;
+  player2Hand?: CardUpdateManyInput;
+  player2Tableau?: CardUpdateManyInput;
   player2Score?: Int;
-  currentRound: Int;
-  gameInProgress?: Boolean;
-  Winner?: PlayerCreateOneWithoutGamesWonInput;
+  discardPile?: CardInstanceUpdateManyInput;
 }
 
-export interface PlayerUpdateManyMutationInput {
-  name?: String;
-  email?: String;
-}
-
-export interface PlayerCreateOneWithoutGamesStartedInput {
-  create?: PlayerCreateWithoutGamesStartedInput;
-  connect?: PlayerWhereUniqueInput;
+export interface CardCreateManyInput {
+  create?: CardCreateInput[] | CardCreateInput;
+  connect?: CardWhereUniqueInput[] | CardWhereUniqueInput;
 }
 
 export type GameWhereUniqueInput = AtLeastOne<{
   id: ID_Input;
 }>;
 
-export interface PlayerCreateWithoutGamesStartedInput {
+export interface PlayerCreateOneWithoutGamesWonInput {
+  create?: PlayerCreateWithoutGamesWonInput;
+  connect?: PlayerWhereUniqueInput;
+}
+
+export interface PlayerCreateInput {
   name: String;
   email?: String;
+  gamesStarted?: GameCreateManyWithoutPlayer1Input;
   gamesJoined?: GameCreateManyWithoutPlayer2Input;
   gamesWon?: GameCreateManyWithoutWinnerInput;
 }
 
-export interface GameUpdateManyMutationInput {
-  roundsNum?: Int;
-  player1Score?: Int;
-  player2Score?: Int;
-  currentRound?: Int;
-  gameInProgress?: Boolean;
-}
-
-export interface GameCreateManyWithoutPlayer2Input {
-  create?: GameCreateWithoutPlayer2Input[] | GameCreateWithoutPlayer2Input;
-  connect?: GameWhereUniqueInput[] | GameWhereUniqueInput;
+export interface PlayerCreateWithoutGamesWonInput {
+  name: String;
+  email?: String;
+  gamesStarted?: GameCreateManyWithoutPlayer1Input;
+  gamesJoined?: GameCreateManyWithoutPlayer2Input;
 }
 
 export interface PlayerWhereInput {
@@ -543,15 +564,9 @@ export interface PlayerWhereInput {
   NOT?: PlayerWhereInput[] | PlayerWhereInput;
 }
 
-export interface GameCreateWithoutPlayer2Input {
-  player1: PlayerCreateOneWithoutGamesStartedInput;
-  roundsNum?: Int;
-  rounds?: RoundCreateManyInput;
-  player1Score?: Int;
-  player2Score?: Int;
-  currentRound: Int;
-  gameInProgress?: Boolean;
-  Winner?: PlayerCreateOneWithoutGamesWonInput;
+export interface GameCreateManyWithoutPlayer1Input {
+  create?: GameCreateWithoutPlayer1Input[] | GameCreateWithoutPlayer1Input;
+  connect?: GameWhereUniqueInput[] | GameWhereUniqueInput;
 }
 
 export interface CardWhereInput {
@@ -606,40 +621,181 @@ export interface CardWhereInput {
   NOT?: CardWhereInput[] | CardWhereInput;
 }
 
-export interface RoundCreateManyInput {
-  create?: RoundCreateInput[] | RoundCreateInput;
+export interface GameCreateWithoutPlayer1Input {
+  player2: PlayerCreateOneWithoutGamesJoinedInput;
+  roundsNum?: Int;
+  rounds?: RoundCreateManyInput;
+  player1Score?: Int;
+  player2Score?: Int;
+  currentRound: Int;
+  gameInProgress?: Boolean;
+  Winner?: PlayerCreateOneWithoutGamesWonInput;
 }
 
-export interface GameUpsertWithWhereUniqueWithoutPlayer2Input {
-  where: GameWhereUniqueInput;
-  update: GameUpdateWithoutPlayer2DataInput;
-  create: GameCreateWithoutPlayer2Input;
+export interface PlayerUpsertWithoutGamesStartedInput {
+  update: PlayerUpdateWithoutGamesStartedDataInput;
+  create: PlayerCreateWithoutGamesStartedInput;
 }
 
-export interface RoundCreateInput {
-  drawDeck?: CardInstanceCreateManyInput;
-  player1Hand?: CardCreateManyInput;
-  player1Tableau?: CardCreateManyInput;
-  player1Score: Int;
-  player2Hand?: CardCreateManyInput;
-  player2Tableau?: CardCreateManyInput;
-  player2Score: Int;
-  discardPile?: CardInstanceCreateManyInput;
+export interface PlayerCreateOneWithoutGamesJoinedInput {
+  create?: PlayerCreateWithoutGamesJoinedInput;
+  connect?: PlayerWhereUniqueInput;
 }
 
-export interface GameUpsertWithWhereUniqueWithoutPlayer1Input {
-  where: GameWhereUniqueInput;
-  update: GameUpdateWithoutPlayer1DataInput;
-  create: GameCreateWithoutPlayer1Input;
+export interface PlayerUpsertWithoutGamesWonInput {
+  update: PlayerUpdateWithoutGamesWonDataInput;
+  create: PlayerCreateWithoutGamesWonInput;
 }
 
-export interface CardInstanceCreateManyInput {
-  create?: CardInstanceCreateInput[] | CardInstanceCreateInput;
+export interface PlayerCreateWithoutGamesJoinedInput {
+  name: String;
+  email?: String;
+  gamesStarted?: GameCreateManyWithoutPlayer1Input;
+  gamesWon?: GameCreateManyWithoutWinnerInput;
 }
 
 export type PlayerWhereUniqueInput = AtLeastOne<{
   id: ID_Input;
 }>;
+
+export interface PlayerUpdateOneRequiredWithoutGamesJoinedInput {
+  create?: PlayerCreateWithoutGamesJoinedInput;
+  update?: PlayerUpdateWithoutGamesJoinedDataInput;
+  upsert?: PlayerUpsertWithoutGamesJoinedInput;
+  connect?: PlayerWhereUniqueInput;
+}
+
+export interface GameUpdateManyDataInput {
+  roundsNum?: Int;
+  player1Score?: Int;
+  player2Score?: Int;
+  currentRound?: Int;
+  gameInProgress?: Boolean;
+}
+
+export interface GameCreateWithoutWinnerInput {
+  player1: PlayerCreateOneWithoutGamesStartedInput;
+  player2: PlayerCreateOneWithoutGamesJoinedInput;
+  roundsNum?: Int;
+  rounds?: RoundCreateManyInput;
+  player1Score?: Int;
+  player2Score?: Int;
+  currentRound: Int;
+  gameInProgress?: Boolean;
+}
+
+export interface GameScalarWhereInput {
+  id?: ID_Input;
+  id_not?: ID_Input;
+  id_in?: ID_Input[] | ID_Input;
+  id_not_in?: ID_Input[] | ID_Input;
+  id_lt?: ID_Input;
+  id_lte?: ID_Input;
+  id_gt?: ID_Input;
+  id_gte?: ID_Input;
+  id_contains?: ID_Input;
+  id_not_contains?: ID_Input;
+  id_starts_with?: ID_Input;
+  id_not_starts_with?: ID_Input;
+  id_ends_with?: ID_Input;
+  id_not_ends_with?: ID_Input;
+  createdAt?: DateTimeInput;
+  createdAt_not?: DateTimeInput;
+  createdAt_in?: DateTimeInput[] | DateTimeInput;
+  createdAt_not_in?: DateTimeInput[] | DateTimeInput;
+  createdAt_lt?: DateTimeInput;
+  createdAt_lte?: DateTimeInput;
+  createdAt_gt?: DateTimeInput;
+  createdAt_gte?: DateTimeInput;
+  updatedAt?: DateTimeInput;
+  updatedAt_not?: DateTimeInput;
+  updatedAt_in?: DateTimeInput[] | DateTimeInput;
+  updatedAt_not_in?: DateTimeInput[] | DateTimeInput;
+  updatedAt_lt?: DateTimeInput;
+  updatedAt_lte?: DateTimeInput;
+  updatedAt_gt?: DateTimeInput;
+  updatedAt_gte?: DateTimeInput;
+  roundsNum?: Int;
+  roundsNum_not?: Int;
+  roundsNum_in?: Int[] | Int;
+  roundsNum_not_in?: Int[] | Int;
+  roundsNum_lt?: Int;
+  roundsNum_lte?: Int;
+  roundsNum_gt?: Int;
+  roundsNum_gte?: Int;
+  player1Score?: Int;
+  player1Score_not?: Int;
+  player1Score_in?: Int[] | Int;
+  player1Score_not_in?: Int[] | Int;
+  player1Score_lt?: Int;
+  player1Score_lte?: Int;
+  player1Score_gt?: Int;
+  player1Score_gte?: Int;
+  player2Score?: Int;
+  player2Score_not?: Int;
+  player2Score_in?: Int[] | Int;
+  player2Score_not_in?: Int[] | Int;
+  player2Score_lt?: Int;
+  player2Score_lte?: Int;
+  player2Score_gt?: Int;
+  player2Score_gte?: Int;
+  currentRound?: Int;
+  currentRound_not?: Int;
+  currentRound_in?: Int[] | Int;
+  currentRound_not_in?: Int[] | Int;
+  currentRound_lt?: Int;
+  currentRound_lte?: Int;
+  currentRound_gt?: Int;
+  currentRound_gte?: Int;
+  gameInProgress?: Boolean;
+  gameInProgress_not?: Boolean;
+  AND?: GameScalarWhereInput[] | GameScalarWhereInput;
+  OR?: GameScalarWhereInput[] | GameScalarWhereInput;
+  NOT?: GameScalarWhereInput[] | GameScalarWhereInput;
+}
+
+export interface GameUpdateInput {
+  player1?: PlayerUpdateOneRequiredWithoutGamesStartedInput;
+  player2?: PlayerUpdateOneRequiredWithoutGamesJoinedInput;
+  roundsNum?: Int;
+  rounds?: RoundUpdateManyInput;
+  player1Score?: Int;
+  player2Score?: Int;
+  currentRound?: Int;
+  gameInProgress?: Boolean;
+  Winner?: PlayerUpdateOneWithoutGamesWonInput;
+}
+
+export interface GameUpsertWithWhereUniqueWithoutWinnerInput {
+  where: GameWhereUniqueInput;
+  update: GameUpdateWithoutWinnerDataInput;
+  create: GameCreateWithoutWinnerInput;
+}
+
+export interface PlayerUpdateOneRequiredWithoutGamesStartedInput {
+  create?: PlayerCreateWithoutGamesStartedInput;
+  update?: PlayerUpdateWithoutGamesStartedDataInput;
+  upsert?: PlayerUpsertWithoutGamesStartedInput;
+  connect?: PlayerWhereUniqueInput;
+}
+
+export interface GameUpdateWithWhereUniqueWithoutWinnerInput {
+  where: GameWhereUniqueInput;
+  data: GameUpdateWithoutWinnerDataInput;
+}
+
+export interface PlayerUpdateWithoutGamesStartedDataInput {
+  name?: String;
+  email?: String;
+  gamesJoined?: GameUpdateManyWithoutPlayer2Input;
+  gamesWon?: GameUpdateManyWithoutWinnerInput;
+}
+
+export interface CardCreateInput {
+  cardType: CardTypes;
+  expeditionValue?: Int;
+  color: Colors;
+}
 
 export interface GameUpdateWithoutPlayer1DataInput {
   player2?: PlayerUpdateOneRequiredWithoutGamesJoinedInput;
@@ -652,46 +808,59 @@ export interface GameUpdateWithoutPlayer1DataInput {
   Winner?: PlayerUpdateOneWithoutGamesWonInput;
 }
 
-export interface GameUpdateManyWithWhereNestedInput {
-  where: GameScalarWhereInput;
-  data: GameUpdateManyDataInput;
-}
-
-export interface PlayerCreateOneWithoutGamesWonInput {
-  create?: PlayerCreateWithoutGamesWonInput;
-  connect?: PlayerWhereUniqueInput;
-}
-
-export interface GameUpsertWithWhereUniqueWithoutWinnerInput {
-  where: GameWhereUniqueInput;
-  update: GameUpdateWithoutWinnerDataInput;
-  create: GameCreateWithoutWinnerInput;
-}
-
-export interface PlayerCreateWithoutGamesWonInput {
-  name: String;
-  email?: String;
-  gamesStarted?: GameCreateManyWithoutPlayer1Input;
-  gamesJoined?: GameCreateManyWithoutPlayer2Input;
-}
-
-export interface GameUpdateWithWhereUniqueWithoutWinnerInput {
-  where: GameWhereUniqueInput;
-  data: GameUpdateWithoutWinnerDataInput;
-}
-
-export interface GameCreateManyWithoutPlayer1Input {
-  create?: GameCreateWithoutPlayer1Input[] | GameCreateWithoutPlayer1Input;
-  connect?: GameWhereUniqueInput[] | GameWhereUniqueInput;
-}
-
-export interface CardUpdateInput {
+export interface CardUpdateManyMutationInput {
   cardType?: CardTypes;
   expeditionValue?: Int;
   color?: Colors;
 }
 
-export interface GameCreateWithoutPlayer1Input {
+export interface GameUpdateWithWhereUniqueWithoutPlayer2Input {
+  where: GameWhereUniqueInput;
+  data: GameUpdateWithoutPlayer2DataInput;
+}
+
+export interface PlayerUpdateWithoutGamesJoinedDataInput {
+  name?: String;
+  email?: String;
+  gamesStarted?: GameUpdateManyWithoutPlayer1Input;
+  gamesWon?: GameUpdateManyWithoutWinnerInput;
+}
+
+export interface GameUpdateWithoutPlayer2DataInput {
+  player1?: PlayerUpdateOneRequiredWithoutGamesStartedInput;
+  roundsNum?: Int;
+  rounds?: RoundUpdateManyInput;
+  player1Score?: Int;
+  player2Score?: Int;
+  currentRound?: Int;
+  gameInProgress?: Boolean;
+  Winner?: PlayerUpdateOneWithoutGamesWonInput;
+}
+
+export interface CardCreateOneInput {
+  create?: CardCreateInput;
+  connect?: CardWhereUniqueInput;
+}
+
+export interface RoundUpdateManyInput {
+  create?: RoundCreateInput[] | RoundCreateInput;
+  update?:
+    | RoundUpdateWithWhereUniqueNestedInput[]
+    | RoundUpdateWithWhereUniqueNestedInput;
+  upsert?:
+    | RoundUpsertWithWhereUniqueNestedInput[]
+    | RoundUpsertWithWhereUniqueNestedInput;
+  delete?: RoundWhereUniqueInput[] | RoundWhereUniqueInput;
+  connect?: RoundWhereUniqueInput[] | RoundWhereUniqueInput;
+  disconnect?: RoundWhereUniqueInput[] | RoundWhereUniqueInput;
+  deleteMany?: RoundScalarWhereInput[] | RoundScalarWhereInput;
+  updateMany?:
+    | RoundUpdateManyWithWhereNestedInput[]
+    | RoundUpdateManyWithWhereNestedInput;
+}
+
+export interface GameCreateInput {
+  player1: PlayerCreateOneWithoutGamesStartedInput;
   player2: PlayerCreateOneWithoutGamesJoinedInput;
   roundsNum?: Int;
   rounds?: RoundCreateManyInput;
@@ -700,6 +869,11 @@ export interface GameCreateWithoutPlayer1Input {
   currentRound: Int;
   gameInProgress?: Boolean;
   Winner?: PlayerCreateOneWithoutGamesWonInput;
+}
+
+export interface RoundUpdateWithWhereUniqueNestedInput {
+  where: RoundWhereUniqueInput;
+  data: RoundUpdateDataInput;
 }
 
 export interface RoundSubscriptionWhereInput {
@@ -713,9 +887,15 @@ export interface RoundSubscriptionWhereInput {
   NOT?: RoundSubscriptionWhereInput[] | RoundSubscriptionWhereInput;
 }
 
-export interface GameUpdateWithWhereUniqueWithoutPlayer1Input {
-  where: GameWhereUniqueInput;
-  data: GameUpdateWithoutPlayer1DataInput;
+export interface RoundUpdateDataInput {
+  drawDeck?: CardInstanceUpdateManyInput;
+  player1Hand?: CardUpdateManyInput;
+  player1Tableau?: CardUpdateManyInput;
+  player1Score?: Int;
+  player2Hand?: CardUpdateManyInput;
+  player2Tableau?: CardUpdateManyInput;
+  player2Score?: Int;
+  discardPile?: CardInstanceUpdateManyInput;
 }
 
 export interface CardInstanceSubscriptionWhereInput {
@@ -735,24 +915,31 @@ export interface CardInstanceSubscriptionWhereInput {
     | CardInstanceSubscriptionWhereInput;
 }
 
-export interface PlayerCreateWithoutGamesJoinedInput {
-  name: String;
-  email?: String;
-  gamesStarted?: GameCreateManyWithoutPlayer1Input;
-  gamesWon?: GameCreateManyWithoutWinnerInput;
+export interface CardInstanceUpdateManyInput {
+  create?: CardInstanceCreateInput[] | CardInstanceCreateInput;
+  deleteMany?: CardInstanceScalarWhereInput[] | CardInstanceScalarWhereInput;
+  updateMany?:
+    | CardInstanceUpdateManyWithWhereNestedInput[]
+    | CardInstanceUpdateManyWithWhereNestedInput;
 }
 
-export interface PlayerUpdateInput {
+export interface PlayerUpdateManyMutationInput {
   name?: String;
   email?: String;
-  gamesStarted?: GameUpdateManyWithoutPlayer1Input;
-  gamesJoined?: GameUpdateManyWithoutPlayer2Input;
-  gamesWon?: GameUpdateManyWithoutWinnerInput;
 }
 
-export interface GameCreateManyWithoutWinnerInput {
-  create?: GameCreateWithoutWinnerInput[] | GameCreateWithoutWinnerInput;
-  connect?: GameWhereUniqueInput[] | GameWhereUniqueInput;
+export interface CardInstanceScalarWhereInput {
+  orderIndex?: Int;
+  orderIndex_not?: Int;
+  orderIndex_in?: Int[] | Int;
+  orderIndex_not_in?: Int[] | Int;
+  orderIndex_lt?: Int;
+  orderIndex_lte?: Int;
+  orderIndex_gt?: Int;
+  orderIndex_gte?: Int;
+  AND?: CardInstanceScalarWhereInput[] | CardInstanceScalarWhereInput;
+  OR?: CardInstanceScalarWhereInput[] | CardInstanceScalarWhereInput;
+  NOT?: CardInstanceScalarWhereInput[] | CardInstanceScalarWhereInput;
 }
 
 export interface GameWhereInput {
@@ -831,23 +1018,57 @@ export interface GameWhereInput {
   NOT?: GameWhereInput[] | GameWhereInput;
 }
 
-export interface GameCreateWithoutWinnerInput {
-  player1: PlayerCreateOneWithoutGamesStartedInput;
-  player2: PlayerCreateOneWithoutGamesJoinedInput;
+export interface CardInstanceUpdateManyWithWhereNestedInput {
+  where: CardInstanceScalarWhereInput;
+  data: CardInstanceUpdateManyDataInput;
+}
+
+export interface GameUpdateManyMutationInput {
   roundsNum?: Int;
-  rounds?: RoundCreateManyInput;
   player1Score?: Int;
   player2Score?: Int;
-  currentRound: Int;
+  currentRound?: Int;
   gameInProgress?: Boolean;
 }
 
-export interface PlayerUpsertWithoutGamesStartedInput {
-  update: PlayerUpdateWithoutGamesStartedDataInput;
-  create: PlayerCreateWithoutGamesStartedInput;
+export interface CardInstanceUpdateManyDataInput {
+  orderIndex?: Int;
 }
 
-export interface GameUpdateInput {
+export interface GameUpsertWithWhereUniqueWithoutPlayer1Input {
+  where: GameWhereUniqueInput;
+  update: GameUpdateWithoutPlayer1DataInput;
+  create: GameCreateWithoutPlayer1Input;
+}
+
+export interface CardUpdateManyInput {
+  create?: CardCreateInput[] | CardCreateInput;
+  update?:
+    | CardUpdateWithWhereUniqueNestedInput[]
+    | CardUpdateWithWhereUniqueNestedInput;
+  upsert?:
+    | CardUpsertWithWhereUniqueNestedInput[]
+    | CardUpsertWithWhereUniqueNestedInput;
+  delete?: CardWhereUniqueInput[] | CardWhereUniqueInput;
+  connect?: CardWhereUniqueInput[] | CardWhereUniqueInput;
+  disconnect?: CardWhereUniqueInput[] | CardWhereUniqueInput;
+  deleteMany?: CardScalarWhereInput[] | CardScalarWhereInput;
+  updateMany?:
+    | CardUpdateManyWithWhereNestedInput[]
+    | CardUpdateManyWithWhereNestedInput;
+}
+
+export interface GameUpdateManyWithWhereNestedInput {
+  where: GameScalarWhereInput;
+  data: GameUpdateManyDataInput;
+}
+
+export interface CardUpdateWithWhereUniqueNestedInput {
+  where: CardWhereUniqueInput;
+  data: CardUpdateDataInput;
+}
+
+export interface GameUpdateWithoutWinnerDataInput {
   player1?: PlayerUpdateOneRequiredWithoutGamesStartedInput;
   player2?: PlayerUpdateOneRequiredWithoutGamesJoinedInput;
   roundsNum?: Int;
@@ -856,22 +1077,32 @@ export interface GameUpdateInput {
   player2Score?: Int;
   currentRound?: Int;
   gameInProgress?: Boolean;
-  Winner?: PlayerUpdateOneWithoutGamesWonInput;
 }
 
-export interface PlayerUpsertWithoutGamesJoinedInput {
-  update: PlayerUpdateWithoutGamesJoinedDataInput;
-  create: PlayerCreateWithoutGamesJoinedInput;
+export interface CardUpdateDataInput {
+  cardType?: CardTypes;
+  expeditionValue?: Int;
+  color?: Colors;
 }
 
-export interface PlayerUpdateOneRequiredWithoutGamesStartedInput {
-  create?: PlayerCreateWithoutGamesStartedInput;
-  update?: PlayerUpdateWithoutGamesStartedDataInput;
-  upsert?: PlayerUpsertWithoutGamesStartedInput;
-  connect?: PlayerWhereUniqueInput;
+export interface CardUpdateInput {
+  cardType?: CardTypes;
+  expeditionValue?: Int;
+  color?: Colors;
 }
 
-export interface GameScalarWhereInput {
+export interface CardUpsertWithWhereUniqueNestedInput {
+  where: CardWhereUniqueInput;
+  update: CardUpdateDataInput;
+  create: CardCreateInput;
+}
+
+export interface CardInstanceCreateInput {
+  card: CardCreateOneInput;
+  orderIndex?: Int;
+}
+
+export interface CardScalarWhereInput {
   id?: ID_Input;
   id_not?: ID_Input;
   id_in?: ID_Input[] | ID_Input;
@@ -902,95 +1133,35 @@ export interface GameScalarWhereInput {
   updatedAt_lte?: DateTimeInput;
   updatedAt_gt?: DateTimeInput;
   updatedAt_gte?: DateTimeInput;
-  roundsNum?: Int;
-  roundsNum_not?: Int;
-  roundsNum_in?: Int[] | Int;
-  roundsNum_not_in?: Int[] | Int;
-  roundsNum_lt?: Int;
-  roundsNum_lte?: Int;
-  roundsNum_gt?: Int;
-  roundsNum_gte?: Int;
-  player1Score?: Int;
-  player1Score_not?: Int;
-  player1Score_in?: Int[] | Int;
-  player1Score_not_in?: Int[] | Int;
-  player1Score_lt?: Int;
-  player1Score_lte?: Int;
-  player1Score_gt?: Int;
-  player1Score_gte?: Int;
-  player2Score?: Int;
-  player2Score_not?: Int;
-  player2Score_in?: Int[] | Int;
-  player2Score_not_in?: Int[] | Int;
-  player2Score_lt?: Int;
-  player2Score_lte?: Int;
-  player2Score_gt?: Int;
-  player2Score_gte?: Int;
-  currentRound?: Int;
-  currentRound_not?: Int;
-  currentRound_in?: Int[] | Int;
-  currentRound_not_in?: Int[] | Int;
-  currentRound_lt?: Int;
-  currentRound_lte?: Int;
-  currentRound_gt?: Int;
-  currentRound_gte?: Int;
-  gameInProgress?: Boolean;
-  gameInProgress_not?: Boolean;
-  AND?: GameScalarWhereInput[] | GameScalarWhereInput;
-  OR?: GameScalarWhereInput[] | GameScalarWhereInput;
-  NOT?: GameScalarWhereInput[] | GameScalarWhereInput;
-}
-
-export interface PlayerUpdateWithoutGamesStartedDataInput {
-  name?: String;
-  email?: String;
-  gamesJoined?: GameUpdateManyWithoutPlayer2Input;
-  gamesWon?: GameUpdateManyWithoutWinnerInput;
-}
-
-export interface GameUpdateManyWithoutWinnerInput {
-  create?: GameCreateWithoutWinnerInput[] | GameCreateWithoutWinnerInput;
-  delete?: GameWhereUniqueInput[] | GameWhereUniqueInput;
-  connect?: GameWhereUniqueInput[] | GameWhereUniqueInput;
-  disconnect?: GameWhereUniqueInput[] | GameWhereUniqueInput;
-  update?:
-    | GameUpdateWithWhereUniqueWithoutWinnerInput[]
-    | GameUpdateWithWhereUniqueWithoutWinnerInput;
-  upsert?:
-    | GameUpsertWithWhereUniqueWithoutWinnerInput[]
-    | GameUpsertWithWhereUniqueWithoutWinnerInput;
-  deleteMany?: GameScalarWhereInput[] | GameScalarWhereInput;
-  updateMany?:
-    | GameUpdateManyWithWhereNestedInput[]
-    | GameUpdateManyWithWhereNestedInput;
-}
-
-export interface GameUpdateManyWithoutPlayer2Input {
-  create?: GameCreateWithoutPlayer2Input[] | GameCreateWithoutPlayer2Input;
-  delete?: GameWhereUniqueInput[] | GameWhereUniqueInput;
-  connect?: GameWhereUniqueInput[] | GameWhereUniqueInput;
-  disconnect?: GameWhereUniqueInput[] | GameWhereUniqueInput;
-  update?:
-    | GameUpdateWithWhereUniqueWithoutPlayer2Input[]
-    | GameUpdateWithWhereUniqueWithoutPlayer2Input;
-  upsert?:
-    | GameUpsertWithWhereUniqueWithoutPlayer2Input[]
-    | GameUpsertWithWhereUniqueWithoutPlayer2Input;
-  deleteMany?: GameScalarWhereInput[] | GameScalarWhereInput;
-  updateMany?:
-    | GameUpdateManyWithWhereNestedInput[]
-    | GameUpdateManyWithWhereNestedInput;
-}
-
-export interface CardUpdateManyMutationInput {
   cardType?: CardTypes;
+  cardType_not?: CardTypes;
+  cardType_in?: CardTypes[] | CardTypes;
+  cardType_not_in?: CardTypes[] | CardTypes;
   expeditionValue?: Int;
+  expeditionValue_not?: Int;
+  expeditionValue_in?: Int[] | Int;
+  expeditionValue_not_in?: Int[] | Int;
+  expeditionValue_lt?: Int;
+  expeditionValue_lte?: Int;
+  expeditionValue_gt?: Int;
+  expeditionValue_gte?: Int;
   color?: Colors;
+  color_not?: Colors;
+  color_in?: Colors[] | Colors;
+  color_not_in?: Colors[] | Colors;
+  AND?: CardScalarWhereInput[] | CardScalarWhereInput;
+  OR?: CardScalarWhereInput[] | CardScalarWhereInput;
+  NOT?: CardScalarWhereInput[] | CardScalarWhereInput;
 }
 
-export interface GameUpdateWithWhereUniqueWithoutPlayer2Input {
-  where: GameWhereUniqueInput;
-  data: GameUpdateWithoutPlayer2DataInput;
+export interface PlayerCreateOneWithoutGamesStartedInput {
+  create?: PlayerCreateWithoutGamesStartedInput;
+  connect?: PlayerWhereUniqueInput;
+}
+
+export interface CardUpdateManyWithWhereNestedInput {
+  where: CardScalarWhereInput;
+  data: CardUpdateManyDataInput;
 }
 
 export interface RoundUpdateManyMutationInput {
@@ -998,18 +1169,27 @@ export interface RoundUpdateManyMutationInput {
   player2Score?: Int;
 }
 
-export interface GameUpdateWithoutPlayer2DataInput {
-  player1?: PlayerUpdateOneRequiredWithoutGamesStartedInput;
-  roundsNum?: Int;
-  rounds?: RoundUpdateManyInput;
-  player1Score?: Int;
-  player2Score?: Int;
-  currentRound?: Int;
-  gameInProgress?: Boolean;
-  Winner?: PlayerUpdateOneWithoutGamesWonInput;
+export interface CardUpdateManyDataInput {
+  cardType?: CardTypes;
+  expeditionValue?: Int;
+  color?: Colors;
 }
 
 export interface RoundWhereInput {
+  id?: ID_Input;
+  id_not?: ID_Input;
+  id_in?: ID_Input[] | ID_Input;
+  id_not_in?: ID_Input[] | ID_Input;
+  id_lt?: ID_Input;
+  id_lte?: ID_Input;
+  id_gt?: ID_Input;
+  id_gte?: ID_Input;
+  id_contains?: ID_Input;
+  id_not_contains?: ID_Input;
+  id_starts_with?: ID_Input;
+  id_not_starts_with?: ID_Input;
+  id_ends_with?: ID_Input;
+  id_not_ends_with?: ID_Input;
   createdAt?: DateTimeInput;
   createdAt_not?: DateTimeInput;
   createdAt_in?: DateTimeInput[] | DateTimeInput;
@@ -1057,23 +1237,32 @@ export interface RoundWhereInput {
   NOT?: RoundWhereInput[] | RoundWhereInput;
 }
 
-export interface RoundUpdateManyInput {
-  create?: RoundCreateInput[] | RoundCreateInput;
-  deleteMany?: RoundScalarWhereInput[] | RoundScalarWhereInput;
-  updateMany?:
-    | RoundUpdateManyWithWhereNestedInput[]
-    | RoundUpdateManyWithWhereNestedInput;
+export interface RoundUpsertWithWhereUniqueNestedInput {
+  where: RoundWhereUniqueInput;
+  update: RoundUpdateDataInput;
+  create: RoundCreateInput;
 }
 
-export interface GameUpdateManyDataInput {
-  roundsNum?: Int;
-  player1Score?: Int;
-  player2Score?: Int;
-  currentRound?: Int;
-  gameInProgress?: Boolean;
+export interface PlayerUpsertWithoutGamesJoinedInput {
+  update: PlayerUpdateWithoutGamesJoinedDataInput;
+  create: PlayerCreateWithoutGamesJoinedInput;
 }
 
 export interface RoundScalarWhereInput {
+  id?: ID_Input;
+  id_not?: ID_Input;
+  id_in?: ID_Input[] | ID_Input;
+  id_not_in?: ID_Input[] | ID_Input;
+  id_lt?: ID_Input;
+  id_lte?: ID_Input;
+  id_gt?: ID_Input;
+  id_gte?: ID_Input;
+  id_contains?: ID_Input;
+  id_not_contains?: ID_Input;
+  id_starts_with?: ID_Input;
+  id_not_starts_with?: ID_Input;
+  id_ends_with?: ID_Input;
+  id_not_ends_with?: ID_Input;
   createdAt?: DateTimeInput;
   createdAt_not?: DateTimeInput;
   createdAt_in?: DateTimeInput[] | DateTimeInput;
@@ -1103,10 +1292,38 @@ export interface RoundScalarWhereInput {
   NOT?: RoundScalarWhereInput[] | RoundScalarWhereInput;
 }
 
-export interface CardCreateInput {
-  cardType: CardTypes;
-  expeditionValue?: Int;
-  color: Colors;
+export interface CardInstanceUpdateManyMutationInput {
+  orderIndex?: Int;
+}
+
+export interface RoundUpdateManyWithWhereNestedInput {
+  where: RoundScalarWhereInput;
+  data: RoundUpdateManyDataInput;
+}
+
+export interface PlayerUpdateInput {
+  name?: String;
+  email?: String;
+  gamesStarted?: GameUpdateManyWithoutPlayer1Input;
+  gamesJoined?: GameUpdateManyWithoutPlayer2Input;
+  gamesWon?: GameUpdateManyWithoutWinnerInput;
+}
+
+export interface GameUpdateManyWithoutPlayer1Input {
+  create?: GameCreateWithoutPlayer1Input[] | GameCreateWithoutPlayer1Input;
+  delete?: GameWhereUniqueInput[] | GameWhereUniqueInput;
+  connect?: GameWhereUniqueInput[] | GameWhereUniqueInput;
+  disconnect?: GameWhereUniqueInput[] | GameWhereUniqueInput;
+  update?:
+    | GameUpdateWithWhereUniqueWithoutPlayer1Input[]
+    | GameUpdateWithWhereUniqueWithoutPlayer1Input;
+  upsert?:
+    | GameUpsertWithWhereUniqueWithoutPlayer1Input[]
+    | GameUpsertWithWhereUniqueWithoutPlayer1Input;
+  deleteMany?: GameScalarWhereInput[] | GameScalarWhereInput;
+  updateMany?:
+    | GameUpdateManyWithWhereNestedInput[]
+    | GameUpdateManyWithWhereNestedInput;
 }
 
 export interface PlayerUpdateWithoutGamesWonDataInput {
@@ -1130,9 +1347,10 @@ export interface RoundUpdateManyDataInput {
   player2Score?: Int;
 }
 
-export interface RoundUpdateManyWithWhereNestedInput {
-  where: RoundScalarWhereInput;
-  data: RoundUpdateManyDataInput;
+export interface GameUpsertWithWhereUniqueWithoutPlayer2Input {
+  where: GameWhereUniqueInput;
+  update: GameUpdateWithoutPlayer2DataInput;
+  create: GameCreateWithoutPlayer2Input;
 }
 
 export interface GameSubscriptionWhereInput {
@@ -1146,35 +1364,33 @@ export interface GameSubscriptionWhereInput {
   NOT?: GameSubscriptionWhereInput[] | GameSubscriptionWhereInput;
 }
 
-export interface GameUpdateWithoutWinnerDataInput {
-  player1?: PlayerUpdateOneRequiredWithoutGamesStartedInput;
-  player2?: PlayerUpdateOneRequiredWithoutGamesJoinedInput;
-  roundsNum?: Int;
-  rounds?: RoundUpdateManyInput;
-  player1Score?: Int;
-  player2Score?: Int;
-  currentRound?: Int;
-  gameInProgress?: Boolean;
+export interface GameUpdateManyWithoutWinnerInput {
+  create?: GameCreateWithoutWinnerInput[] | GameCreateWithoutWinnerInput;
+  delete?: GameWhereUniqueInput[] | GameWhereUniqueInput;
+  connect?: GameWhereUniqueInput[] | GameWhereUniqueInput;
+  disconnect?: GameWhereUniqueInput[] | GameWhereUniqueInput;
+  update?:
+    | GameUpdateWithWhereUniqueWithoutWinnerInput[]
+    | GameUpdateWithWhereUniqueWithoutWinnerInput;
+  upsert?:
+    | GameUpsertWithWhereUniqueWithoutWinnerInput[]
+    | GameUpsertWithWhereUniqueWithoutWinnerInput;
+  deleteMany?: GameScalarWhereInput[] | GameScalarWhereInput;
+  updateMany?:
+    | GameUpdateManyWithWhereNestedInput[]
+    | GameUpdateManyWithWhereNestedInput;
 }
 
-export interface PlayerUpsertWithoutGamesWonInput {
-  update: PlayerUpdateWithoutGamesWonDataInput;
-  create: PlayerCreateWithoutGamesWonInput;
-}
-
-export interface PlayerCreateInput {
-  name: String;
-  email?: String;
-  gamesStarted?: GameCreateManyWithoutPlayer1Input;
-  gamesJoined?: GameCreateManyWithoutPlayer2Input;
-  gamesWon?: GameCreateManyWithoutWinnerInput;
-}
+export type RoundWhereUniqueInput = AtLeastOne<{
+  id: ID_Input;
+}>;
 
 export interface NodeNode {
   id: ID_Output;
 }
 
 export interface RoundPreviousValues {
+  id: ID_Output;
   createdAt: DateTimeOutput;
   player1Score: Int;
   player2Score: Int;
@@ -1183,6 +1399,7 @@ export interface RoundPreviousValues {
 export interface RoundPreviousValuesPromise
   extends Promise<RoundPreviousValues>,
     Fragmentable {
+  id: () => Promise<ID_Output>;
   createdAt: () => Promise<DateTimeOutput>;
   player1Score: () => Promise<Int>;
   player2Score: () => Promise<Int>;
@@ -1191,6 +1408,7 @@ export interface RoundPreviousValuesPromise
 export interface RoundPreviousValuesSubscription
   extends Promise<AsyncIterator<RoundPreviousValues>>,
     Fragmentable {
+  id: () => Promise<AsyncIterator<ID_Output>>;
   createdAt: () => Promise<AsyncIterator<DateTimeOutput>>;
   player1Score: () => Promise<AsyncIterator<Int>>;
   player2Score: () => Promise<AsyncIterator<Int>>;
@@ -1810,12 +2028,14 @@ export interface CardInstancePreviousValuesSubscription
 }
 
 export interface Round {
+  id: ID_Output;
   createdAt: DateTimeOutput;
   player1Score: Int;
   player2Score: Int;
 }
 
 export interface RoundPromise extends Promise<Round>, Fragmentable {
+  id: () => Promise<ID_Output>;
   createdAt: () => Promise<DateTimeOutput>;
   drawDeck: <T = FragmentableArray<CardInstance>>(
     args?: {
@@ -1890,6 +2110,7 @@ export interface RoundPromise extends Promise<Round>, Fragmentable {
 export interface RoundSubscription
   extends Promise<AsyncIterator<Round>>,
     Fragmentable {
+  id: () => Promise<AsyncIterator<ID_Output>>;
   createdAt: () => Promise<AsyncIterator<DateTimeOutput>>;
   drawDeck: <T = Promise<AsyncIterator<CardInstanceSubscription>>>(
     args?: {

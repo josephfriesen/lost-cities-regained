@@ -25,6 +25,7 @@ type Game {
 }
 
 type Round {
+  id: ID! @unique
   createdAt: DateTime!
   drawDeck: [CardInstance!]! @relation(name: "CardsInDrawDeck")
   player1Hand: [Card!]! @relation(name: "CardsInPlayer1Hand")
