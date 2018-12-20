@@ -1,15 +1,0 @@
-endpoint: https://us1.prisma.sh/lost-cities-regained/lost-cities/dev
-
-datamodel: datamodel.prisma
-
-secret: shhhitsasecret8888
-
-generate:
-    - generator: javascript-client
-      output: ./generated/prisma-client
-    - generator: graphql-schema
-      output: ../src/generated
-
-hooks:
-  post-deploy:
-    - prisma generate
