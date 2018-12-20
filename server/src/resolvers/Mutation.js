@@ -14,31 +14,41 @@ async function newRound(parent, args, context, info) {
   const player2Hand = getCardIdsFromConstructedInstances(dealCards(deck, 8));
   const discardPile = [];
   const roundCreateInput = {
-    data: {
-      drawDeck: { create: deck },
-      player1Hand: { connect: player1Hand },
-      player2Hand: { connect: player2Hand },
-      player1Tableau: [],
-      player2Tableau: [],
-      player1Score: 0,
-      player2Score: 0
-    }
+    drawDeck: { create: deck },
+    player1Hand: { connect: player1Hand },
+    player2Hand: { connect: player2Hand },
+    player1Tableau: [],
+    player2Tableau: [],
+    player1Score: 0,
+    player2Score: 0
   };
-  return context.db.mutation.createRound(roundCreateInput, info);
+  return roundCreateInput;
 }
 
 async function newGame(parent, args, context, info) {
-  // let roundids = [];
-  // for (let i = 1; i <= 3; i++) {
-  //   const round = await newRound(parent, args, context, `{id}`);
-  //   roundids.push({ id: round.id });
-  // }
-  // console.log("Your round ids are: ", roundids);
-  // return null;
+  const rounds = { create: [] }
+  for (let i = 1; i <= args.roundsNum; i++) {
+    const round = await newRound(parent, args, context, info);
+    rounds.create.push(round);
+  }
+
+  const input = {
+    data: {
+      rounds,
+      roundsNum: args.roundsNum,
+      player1: { connect: { id: args.player1 } },
+      player2: { connect: { id: args.player2 } },
+      currentRound: 1,
+      gameInProgress: true,
+    }
+  }
+  console.log(input);
+  return null;
 }
 
 module.exports = {
   newPlayer,
   newGame,
   newRound,
+
 }
